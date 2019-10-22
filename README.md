@@ -8,4 +8,5 @@ Discord -> https://discord.gg/x9Ute4a
 # Requirements
 
 Libcapstone : https://www.capstone-engine.org/
+
 Libkeystone : http://www.keystone-engine.org/
