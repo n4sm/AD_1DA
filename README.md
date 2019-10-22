@@ -20,7 +20,7 @@ Next, you have severals binaries :
 
 **test_  :    which is a target C binary (you can look at /test_folder/test.c)**
 
-**test   :    which is a nasm binary that will be injected in the target file**
+**test   :    which is a nasm binary that will be injected in the target file (only the .text)**
 
 ## Utilisation
 Help :
