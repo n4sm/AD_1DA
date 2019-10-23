@@ -100,6 +100,23 @@ Bytes injected :
         b81000bf1000686e61736d488d3424ba4000f5b81000bf10006aa488d3424ba1000f5b83c000bf0000f5
 Length of the stub : 0x3d
 ```
+Inject code from assembly instructions in a file : 
+```bash
+$ echo "mov rax, 0; mov rdi, 0; syscall" > instructions.txt
+$ ./main test_ --add-code-only --raw-data instructions.txt 
+Instructions to inject : 
+        mov rax, 0; mov rdi, 0; syscall
+Instructions compiled : 
+        48 c7 c0  0  0  0  0 48 c7 c7  0  0  0  0  f  5 
+        48c7c0000048c7c70000f5
+Entry point rewritten -> 0xae0
+[*] Generating a new test_.p4cked executable file
+Bytes injected : 
+        48c7c0000048c7c70000f5
+Length of the stub : 0x10
+```
+
+But for the moment it does not work xD
 
 # Work in progress ..
 
