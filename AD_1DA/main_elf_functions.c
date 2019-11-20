@@ -141,7 +141,7 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
 
     // On cherche le deuxieme pt_load
 
-    Elf64_Phdr *scnd_pt_load;
+    Elf64_Phdr *scnd_pt_load = NULL;
 
     for (size_t i = 0; i < eh_ptr->e_phnum; i++)
     {
@@ -156,6 +156,26 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
         }
         
     }
+
+    if (scnd_pt_load == NULL)
+    {
+        printf("[_] Second pt_load not found\n");
+        printf("Exiting\n");
+
+        // ============
+
+        if (munmap(file_ptr, stat_file.st_size) != 0){
+		    exit(-1);
+	    }
+
+        // ============
+        /*
+        if (inject_code_ovrwrt_ep(filename, name_sec, stub, len_stub)) // aller sur github checher m_extend_code
+            return -1;
+        */
+        return 0;
+    }
+    
     
     unsigned char *malloc_fst_pt = malloc(phdr_fst_pt->p_filesz + (scnd_pt_load->p_offset - phdr_fst_pt->p_filesz) + scnd_pt_load->p_filesz + len_stub);
 
@@ -173,51 +193,75 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
 
     // ==========
 
-    if (patch_target(stub, 0x11111111, len_stub, (long)eh_ptr->e_entry) == -1 || patch_target(stub, 0x33333333, len_stub, (long)(scnd_pt_load->p_offset + scnd_pt_load->p_filesz)) == -1)
+    
+    unsigned char *address_to_inject =  m_new_section(malloc_fst_pt, (unsigned char *)data_nxt_pt, buffer_mdata_ph, len_stub, stat_file.st_size, len_data);
+    
+    Elf64_Ehdr *tmp_eh_ptr = (Elf64_Ehdr *)address_to_inject; // header temporarire avec l'adresse du truc que on va inject
+
+    // Ici on rewrite l'ep
+
+    // Suivant le pie ou pas 
+
+    if (!has_pie_or_not(buffer_mdata_ph, eh_ptr))
     {
-       printf("The stub cannot be patched because the pattern 0x11111111 and 0x33333333 can't be found\n"); // 0x3333333333333333
-       exit(-1);
+
+        // Si il a le pie on le patch avec certaines values
+
+        if (patch_target(stub, 0x11111111, len_stub, (long)eh_ptr->e_entry) || patch_target(stub, 0x33333333, len_stub, (long)(scnd_pt_load->p_vaddr + scnd_pt_load->p_memsz))) //|| patch_target(stub, 0x22222222, len_stub, (long)0) == -1)
+        {
+            printf("The stub cannot be patched because the pattern 0x11111111, 0x33333333 and 0x22222222 can't be found\n"); // 0x3333333333333333
+            exit(-1);
+        }
+
+        // Et du coup on overwrite l'ep
+
+        tmp_eh_ptr->e_entry = scnd_pt_load->p_vaddr + scnd_pt_load->p_memsz; // Vu que là on est au niveau de la mémoire, on manipule l'addr virtuelle et sa memoty size
+        printf("The binary has the pie !\n");
+        printf("Entry point rewritten : 0x%lx\n", tmp_eh_ptr->e_entry);
+
+
+    }
+    else
+    {
+        // On cherche la base address et on overwrite l'ep
+
+        long base_address = search_base_addr(buffer_mdata_ph, eh_ptr);
+        tmp_eh_ptr->e_entry = scnd_pt_load->p_vaddr + scnd_pt_load->p_filesz; // Fais expres
+        printf("The base address of the target binary is 0x%lx\n", base_address);
+        printf("Entry point rewritten : 0x%lx\n", tmp_eh_ptr->e_entry);
+
+        // Là ça veut dire que il a le pie
+
+        // Du coup on va patch le tout avec certaines autres values
+
+        ssize_t len_crafted_stub;
+
+        unsigned char *stub_crafted = NULL;
+        
+        stub_crafted = craft_mprotect_memory(&len_crafted_stub);
+
+        if (patch_target(stub_crafted, 0x11111111, len_crafted_stub, (long)eh_ptr->e_entry) == -1)
+        {
+            printf("The stub cannot be patched because the pattern 0x11111111 can't be found\n"); // 0x3333333333333333
+            exit(-1);
+        }
+
+        if (inject_section(stub_crafted, len_crafted_stub, address_to_inject, scnd_pt_load->p_offset + scnd_pt_load->p_filesz))
+        {
+            perror("[ERROR] Exit \n");
+            return -1;
+        }
+
     }
 
-    unsigned char *address_to_inject =  m_new_section(malloc_fst_pt, (unsigned char *)data_nxt_pt, buffer_mdata_ph, len_stub, stat_file.st_size, len_data);
 
     if (inject_section(stub, len_stub, address_to_inject, scnd_pt_load->p_offset + scnd_pt_load->p_filesz))
     {
         perror("[ERROR] Exit \n");
         return -1;
     }
-
-    // Ici on rewrite l'ep
-
-    // Suivant le pie ou pas
-    
-    Elf64_Ehdr *tmp_eh_ptr = (Elf64_Ehdr *)address_to_inject;   
-
-    // Etant donné que on veut pas casser la section header table (mm si c'est inutile)
-
-    //tmp_eh_ptr->e_shoff += len_stub;
-
-    // Vous pouvez décomentez, mais gdb il aime pas vu que y'a des offsets de sec inutiles qui sont faux
-
-    // Sah on est gentil
-
-    if (!has_pie_or_not(buffer_mdata_ph, eh_ptr))
-    {
-        tmp_eh_ptr->e_entry = phdr_fst_pt->p_memsz + (scnd_pt_load->p_offset - phdr_fst_pt->p_filesz) + scnd_pt_load->p_filesz + 0x200000; //Il sort vrmt de nul part, je sais absolument pas ce que c'est, je l'ai trouvé au pif et ça a l'ai de marcher donc cool mdr
-        printf("The binary has the pie !\n");
-        printf("Entry point rewritten : 0x%lx\n", tmp_eh_ptr->e_entry);
-    }
-    else
-    {
-        long base_address = search_base_addr(buffer_mdata_ph, eh_ptr);
-        tmp_eh_ptr->e_entry = phdr_fst_pt->p_filesz + (scnd_pt_load->p_offset - phdr_fst_pt->p_filesz) + scnd_pt_load->p_memsz + base_address + 0x200000; // le meme ici avec 0x200000 en 64 bits bien sur x)
-        printf("The base address of the target binary is 0x%lx", base_address);
-    }
-    
     
     // On crée un nouveau fichier pour notre elf
-
-    //printf("0x%x", scnd_pt_load->p_offset + scnd_pt_load->p_filesz - (eh_ptr->e_ehsize + eh_ptr->e_phnum * eh_ptr->e_phentsize));
 
     char *name_file_dumped = strcat((char *)filename, name_sec);
 
@@ -235,7 +279,7 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
 
     write(file_dumped, address_to_inject, stat_file.st_size + len_stub);
 
-    printf("Bytes injected : \n");
+    printf("Bytes injected at 0x%lx: \n", scnd_pt_load->p_vaddr + scnd_pt_load->p_memsz);
     printf("\t");
 
     for (size_t i = 0; i < len_stub; i++)

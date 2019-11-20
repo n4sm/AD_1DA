@@ -222,15 +222,17 @@ int rewrite_ep(Elf64_Ehdr *eh_ptr, Elf64_Phdr *buffer_mdata_ph[], Elf64_Shdr *bu
 
 // On va craft tjrs un petit stub qui va mettre en exec un petite zone de code à un endroit donné
 
-#define CODE_MPROTECT "push rax; push rsi; push rdi; mov rax, 0xa; "
+#define CODE_MPROTECT "MOV rax, 0x11111111; JMP rax"
 
-unsigned char *craft_mprotect_memory(){
+unsigned char *craft_mprotect_memory(ssize_t *len_crafted_stub){
 
     ks_engine *ks;
     ks_err error;
     size_t count;
     unsigned char *encode;
     size_t size;
+
+    printf("Crafting stub with keystone : \n");
 
     if((error = ks_open(KS_ARCH_X86, KS_MODE_64, &ks)) != KS_ERR_OK){
         printf("ERROR: failed on ks_open(), quit\n");
@@ -243,10 +245,21 @@ unsigned char *craft_mprotect_memory(){
     }
     else
     {
+        printf("\t");
+
         for (size_t i = 0; i < size; i++)
         {
             printf("%2x ", *(encode + i));
         }
+
+        printf("\n");
+
+        ks_free(encode);
+        ks_close(ks);
+
+        *len_crafted_stub = size;
+
+        return encode;
         
     }
 
