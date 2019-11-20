@@ -29,9 +29,9 @@ $ ./main -h
 AD_1DA is a modern tool made in order to obfuscate your elf binaries
 Help : 
                 ./main -h : Show this help
-                ./main <target_binary> -o <stub to inject>: Basic obfuscation
-                ./main <target_binary> --add-code-only <stub_to inject>: Add only the executable bytes at the end of the pt_load
-                ./main <target_binary> --add-code-only --raw-data <stub_to inject>: *
+                ./main <target_binary> -o <stub to inject>: Basic obfuscation (in work)
+                ./main <target_binary> --add-code-only <stub_to inject>: Add only the executable bytes at the end of the pt_load (not availaible)
+                ./main <target_binary> --add-code-only --raw-data <stub_to inject>: * (not availaible)
 
 * The stub is automatically an elf but you can indicate the --raw-data options if you want to inject directly assembly instructions from your stub
 ```
@@ -43,80 +43,60 @@ Usage : ./main <target_file> <option> <stub_to_inject>
 Help : ./main -h
 ```
 
-Inject code : 
+Inject code :
+
 ```bash
-$ ./main test_ -o test
+$ ./main test_ -o test_hook
 Raw executables bytes in the stub : 
-        b81000bf1000686e61736d488d3424ba4000f5b81000bf10006aa488d3424ba1000f5b83c000bf0000f5
+        4c8d25f9ffffff415041b8333333334d29c44158504889e04883c0853515255575641504151415241534989c3b82000498b7b8f5415b415a415941585e5f5d5a595b58b8111111114c1e0ffe0
 Disassembling the stub : 
-        [mov]      eax, 1
-        [mov]      edi, 1
-        [push]      0x6d73616e
-        [lea]      rsi, qword ptr [rsp]
-        [mov]      edx, 4
+        [lea]      r12, qword ptr [rip - 7]
+        [push]      r8
+        [mov]      r8d, 0x33333333
+        [sub]      r12, r8
+        [pop]      r8
+        [push]      rax
+        [mov]      rax, rsp
+        [add]      rax, 8
+        [push]      rbx
+        [push]      rcx
+        [push]      rdx
+        [push]      rbp
+        [push]      rdi
+        [push]      rsi
+        [push]      r8
+        [push]      r9
+        [push]      r10
+        [push]      r11
+        [mov]      r11, rax
+        [mov]      eax, 2
+        [mov]      rdi, qword ptr [r11 + 8]
         [syscall]      _
-        [mov]      eax, 1
-        [mov]      edi, 1
-        [push]      0xa
-        [lea]      rsi, qword ptr [rsp]
-        [mov]      edx, 1
-        [syscall]      _
-        [mov]      eax, 0x3c
-        [mov]      edi, 0
-        [syscall]      _
-Entry point rewritten -> 0xae0
+        [pop]      r11
+        [pop]      r10
+        [pop]      r9
+        [pop]      r8
+        [pop]      rsi
+        [pop]      rdi
+        [pop]      rbp
+        [pop]      rdx
+        [pop]      rcx
+        [pop]      rbx
+        [pop]      rax
+        [mov]      eax, 0x11111111
+        [add]      rax, r12
+        [jmp]      rax
+Second pt_load is found at 0xdb8
+The binary has the pie !
+Entry point rewritten : 0x201030
 [*] Generating a new test_.p4cked executable file
-Bytes injected : 
-        b81000bf1000686e61736d488d3424ba4000f5b81000bf10006aa488d3424ba1000f5b83c000bf0000f5
-Length of the stub : 0x3d
+Bytes injected at 0x201030: 
+       4c8d25f9ffffff415041b830102004d29c44158504889e04883c0853515255575641504151415241534989c3b82000498b7b8f5415b415a415941585e5f5d5a595b58b8305004c1e0ffe0
+Length of the stub : 0x51
 ```
+It will inject test_hook in test_.
 
-The entry point will be overwritten and your target elf file will be hooked.
-
-Inject code without adding section : 
-```bash
-$ ./main test_ --add-code-only test
-Raw executables bytes in the stub : 
-        b81000bf1000686e61736d488d3424ba4000f5b81000bf10006aa488d3424ba1000f5b83c000bf0000f5
-Disassembling the stub : 
-        [mov]      eax, 1
-        [mov]      edi, 1
-        [push]      0x6d73616e
-        [lea]      rsi, qword ptr [rsp]
-        [mov]      edx, 4
-        [syscall]      _
-        [mov]      eax, 1
-        [mov]      edi, 1
-        [push]      0xa
-        [lea]      rsi, qword ptr [rsp]
-        [mov]      edx, 1
-        [syscall]      _
-        [mov]      eax, 0x3c
-        [mov]      edi, 0
-        [syscall]      _
-Entry point rewritten -> 0xae0
-[*] Generating a new test_.p4cked executable file
-Bytes injected : 
-        b81000bf1000686e61736d488d3424ba4000f5b81000bf10006aa488d3424ba1000f5b83c000bf0000f5
-Length of the stub : 0x3d
-```
-Inject code from assembly instructions in a file : 
-```bash
-$ echo "mov rax, 0; mov rdi, 0; syscall" > instructions.txt
-$ ./main test_ --add-code-only --raw-data instructions.txt 
-Instructions to inject : 
-        mov rax, 0; mov rdi, 0; syscall
-Instructions compiled : 
-        48 c7 c0  0  0  0  0 48 c7 c7  0  0  0  0  f  5 
-        48c7c0000048c7c70000f5
-Entry point rewritten -> 0xae0
-[*] Generating a new test_.p4cked executable file
-Bytes injected : 
-        48c7c0000048c7c70000f5
-Length of the stub : 0x10
-```
-
-But for the moment it does not work xD
+**Warning : the stub that you want to inject must be a file developped in assembly file which must be executable**
 
 # Work in progress ..
 
