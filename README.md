@@ -11,6 +11,7 @@ AD_1DA is a modern tool made in order to obfuscate your elf binaries.
 ```bash
 git clone https://github.com/n4sm/AD_1DA
 cd AD_1DA
+chmod +x build.sh
 ./build.sh
 ```
 
