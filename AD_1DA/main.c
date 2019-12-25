@@ -14,6 +14,7 @@
 #include <ctype.h>
 
 #include "include.h"
+#include "misc.h"
 
 #include <capstone/capstone.h>
 #include <keystone/keystone.h>
@@ -22,6 +23,8 @@
 
 int main(int argc, char **argv){
     
+    greetz();
+
     int argc_usage = 2;
     
     if (argc < argc_usage)
@@ -65,7 +68,17 @@ int main(int argc, char **argv){
         exit_clean(text_stub);
     }
 
+    else if (argc == 4 && !strcmp(argv[2], "-m"))
+    {
+        ssize_t len_stub = 0;
+        unsigned char *text_stub = init_map_and_get_stub(argv[3], &len_stub);
+
+        add_section_ovrwrte_ep_inject_code(argv[1], ".p4cked", text_stub, len_stub, false, true);
+
+        exit_clean(text_stub);
+    }
     
+
     else
     {
         show_help(argv);
