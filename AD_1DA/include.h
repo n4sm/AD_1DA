@@ -32,7 +32,7 @@ int inject_code_ovrwrt_ep(const char *filename, const char *name_sec, unsigned c
 
 int inject_code_ovrwrt_ep_raw_data(const char *filename, const char *name_sec, unsigned char *stub, ssize_t len_stub);
 
-unsigned char *init_map_and_get_stub(const char *stub_file, ssize_t *len_stub);
+unsigned char *init_map_and_get_stub(const char *stub_file, ssize_t *len_stub, bool disass_or_not);
 
 unsigned char *init_map_and_get_stub_raw(const char *stub_file, ssize_t *len_stub);
 

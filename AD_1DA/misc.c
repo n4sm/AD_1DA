@@ -27,6 +27,7 @@ void show_help(char **argv){
 void help(char **argv){
     printf("AD_1DA is a modern tool made in order to obfuscate your elf binaries\n");
     printf("Help : \n");
+    printf("\t\t%s <target_binary> [OPTIONS] <stub_to_inject> -v: Inject stub_to_inject and patching it as a stub injected in an elf with OPTIONS without the disassembly\n", argv[0]);
     printf("\t\t%s -h : Show this help\n", argv[0]);
     printf("\t\t%s <target_binary> -o <stub to inject>: Basic obfuscation (in work)\n", argv[0]);
     printf("\t\t%s <target_binary> -m <stub_to inject>: Create a new binary (<target_binary>.p4cked), which will be metamorphic and polymorphic\n", argv[0]);

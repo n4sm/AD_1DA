@@ -316,7 +316,7 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
 // ===========================================================================================================
 
 
-unsigned char *init_map_and_get_stub(const char *stub_file, ssize_t *len_stub){
+unsigned char *init_map_and_get_stub(const char *stub_file, ssize_t *len_stub, bool disass_or_not){
 
     struct stat stat_file = {0};
 
@@ -399,9 +399,13 @@ unsigned char *init_map_and_get_stub(const char *stub_file, ssize_t *len_stub){
 
     printf("\n");
 
-    printf("Disassembling the stub : \n");
+    if (disass_or_not == false)
+    {
+        printf("Disassembling the stub : \n");
 
-    disass_raw(text_stub, size_stub_malloc); // Disassembly
+        disass_raw(text_stub, size_stub_malloc); // Disassembly
+    }
+
 
     if (munmap(stub_ptr, stat_file.st_size))
     {
