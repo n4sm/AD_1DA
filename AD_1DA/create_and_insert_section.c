@@ -21,17 +21,12 @@
 #include <keystone/keystone.h>
 #include <capstone/capstone.h>
 
-// Bon bah faut tout refaire ..
-// ui indeed
-
 // ==========================================================================================================================
 // =================================    Functions which insert and create a section =========================================
 // ==========================================================================================================================
 
 
 // ==========================================================================================================================
-
-// Ca c'est un try d'un truc qui a pas marché .. x)
 
 int create_new_section(const char *filename, ssize_t len_sec, const char *name_sec){
 
@@ -84,8 +79,6 @@ unsigned char *m_new_section(unsigned char *target_pt_load,  unsigned char *targ
 
     // **********************************************************
 
-    // len_data == tout ce ke y'a après le 2nd pt_load et qui du coup est pas mappé
-
     Elf64_Ehdr *eh_ptr = (Elf64_Ehdr *)target_pt_load;
 
     Elf64_Phdr *tmp_phdr[eh_ptr->e_phnum];
@@ -104,9 +97,9 @@ unsigned char *m_new_section(unsigned char *target_pt_load,  unsigned char *targ
         }
         else if (tmp_phdr[i]->p_type == PT_LOAD)
         {
-            // On sait que c'est le deuxieme
+            // We know that it's teh second
 
-            tmp_phdr[i]->p_memsz += sz_sec; // Ducoup on change la taille du deuxieme pt_load car c'est là que on va inject la section
+            tmp_phdr[i]->p_memsz += sz_sec; // We change the length of the second pt_load where we will inject our section
             tmp_phdr[i]->p_filesz += sz_sec;
 
             tmp_phdr[i]->p_flags = 0x7;
@@ -120,15 +113,6 @@ unsigned char *m_new_section(unsigned char *target_pt_load,  unsigned char *targ
 
     eh_ptr->e_shoff += sz_sec;
 
-    /*
-
-    if(!realloc(target_pt_load, phdr_pt_load->p_filesz)){
-        printf("[ERROR] Fatal realloc\n");
-        exit(-1);
-    }
-
-    // A voir, pour l'instant je del pas ça
-
     */
 
     // ===========
@@ -137,21 +121,11 @@ unsigned char *m_new_section(unsigned char *target_pt_load,  unsigned char *targ
 
     // ===========
 
-    // Mtn faut tout dumper
-
-    // On crée ce qui va etre le nouvel elf
-
     unsigned char *dumped_data = malloc(len_target_file + sz_sec);
-
-    // On met tout ce qui va etre mappé plus l'espace pour notre code à inject
 
     memcpy(dumped_data, target_pt_load, len_target_file - len_data);
 
-    // Et on met le reste après
-
-    memcpy(dumped_data + len_target_file - len_data + sz_sec, target_scnd_pt_load, len_data);
-
-    // Et on return un ptr que va falloir désallouer
+    memcpy(dumped_data + len_target_file - len_data + sz_sec, target_scnd_pt_load, len_data)
 
     return dumped_data;
 
@@ -171,8 +145,6 @@ int inject_section(unsigned char *buffer_bytes, ssize_t buffer_len, unsigned cha
 }
 
 // ===========================================================================================================
-
-// C'est plus utile mais tjrs intéressant à lire
 
 int rename_target_section(Elf64_Ehdr *eh_ptr, Elf64_Phdr *buffer_mdata_ph[], Elf64_Shdr *buffer_mdata_sh[], unsigned char *file_ptr, Elf64_Shdr *target_shdr){
 
@@ -218,11 +190,6 @@ int rewrite_ep(Elf64_Ehdr *eh_ptr, Elf64_Phdr *buffer_mdata_ph[], Elf64_Shdr *bu
 }
 
 // ===================================================================================================================================
-
-
-// On va craft tjrs un petit stub qui va mettre en exec un petite zone de code à un endroit donné
-
-#define CODE_MPROTECT "MOV rax, 0x11111111; JMP rax"
 
 unsigned char *craft_mprotect_memory(ssize_t *len_crafted_stub){
 
