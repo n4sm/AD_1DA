@@ -1,14 +1,23 @@
-//  =====================================================================
-//  ======================misc prototypes functions======================
-//  =====================================================================
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <libelf.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <inttypes.h>
+#include <gelf.h>
+#include <stdarg.h>
+#include <getopt.h>
+#include <ctype.h>
+#include <elf.h>
+#include <bfd.h>
+#include <pthread.h>
 
-void show_help(char **argv);
-
-void help(char **argv);
-
-int main_fetcher(void);
-
-int exit_clean(unsigned char *text_stub);
+#include <keystone/keystone.h>
+#include <capstone/capstone.h>
 
 //  =====================================================================
 //  =======================elf prototypes functions======================
@@ -17,7 +26,7 @@ int exit_clean(unsigned char *text_stub);
 
 int is_elf(unsigned char *eh_ptr);
 
-int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_sec, unsigned char *stub, ssize_t len_stub);
+int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_sec, unsigned char *stub, ssize_t len_stub, bool pie, bool meta);
 
 int inject_code_ovrwrt_ep(const char *filename, const char *name_sec, unsigned char *stub, ssize_t len_stub);
 
@@ -45,7 +54,9 @@ int rewrite_ep(Elf64_Ehdr *eh_ptr, Elf64_Phdr *buffer_mdata_ph[], Elf64_Shdr *bu
 
 ssize_t len_bytes(unsigned char *bytes);
 
-unsigned char *craft_mprotect_memory();
+unsigned char *craft_mprotect_memory(ssize_t *len_crafted_stub);
+
+//int meta_patch();
 
 // ========================== Functions from my packer and my disassembler ============================
 // ==============================https://github.com/n4sm/m0dern_p4cker=================================

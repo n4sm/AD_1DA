@@ -235,14 +235,22 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
         // Search the base address
 
         long base_address = search_base_addr(buffer_mdata_ph, eh_ptr);
-        tmp_eh_ptr->e_entry = scnd_pt_load->p_vaddr + scnd_pt_load->p_memsz;
+        tmp_eh_ptr->e_entry = scnd_pt_load->p_vaddr + scnd_pt_load->p_filesz;
         printf("The base address of the target binary is 0x%lx\n", base_address);
         printf("Entry point overwritten : 0x%lx\n", tmp_eh_ptr->e_entry);
 
-        if (patch_target(stub, 0x11111111, len_stub, (long)eh_ptr->e_entry) == -1)
+        if (patch_target(stub, 0x1111111111111111, len_stub, (long)base_address) == -1)
         {
-            printf("The stub cannot be patched because the pattern 0x11111111 can't be found\n"); // 0x3333333333333333
+            printf("The stub cannot be patched because the pattern 0x1111111111111111 can't be found\n"); // 0x3333333333333333
             exit(-1);
+        }
+
+        if (meta == true){
+            if (patch_target(stub, (long)0x4444444444444444, len_stub, (long)random_key) || patch_target(stub, (long)0x5555555555555555, len_stub, (long)len_stub) || patch_target(stub, (long)0x6666666666666666, len_stub, (long)scnd_pt_load->p_offset + scnd_pt_load->p_filesz) || patch_target(stub, (long)0x7777777777777777, len_stub, (long)phdr_fst_pt->p_memsz) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) || patch_target(stub, (long)0x8888888888888888, len_stub, (long)len_text) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) == -1)
+            {
+                printf("The stub cannot be patched because the pattern 0x4444444444444444 can't be found\n");
+                exit(-1);
+            }
         }
 
     }

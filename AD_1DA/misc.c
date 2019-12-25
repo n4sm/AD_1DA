@@ -14,6 +14,7 @@
 #include <ctype.h>
 
 #include "include.h"
+#include "misc.h"
 
 #include <capstone/capstone.h>
 #include <keystone/keystone.h> 
@@ -30,6 +31,7 @@ void help(char **argv){
     printf("\t\t%s <target_binary> -o <stub to inject>: Basic obfuscation (in work)\n", argv[0]);
     printf("\t\t%s <target_binary> -m <stub_to inject>: Create a new binary (<target_binary>.p4cked), which will be metamorphic and polymorphic\n", argv[0]);
     printf("\t\t%s <target_binary> -o <stub_to_inject> -pie: Inject stub_to_inject and patching it as a stub injected in a position independant executable binary\n", argv[0]);
+    printf("\t\t%s <target_binary> -o <stub_to_inject>: Inject stub_to_inject and patching it as a stub injected in an elf\n", argv[0]);
     printf("\n");
 }
 
@@ -38,4 +40,12 @@ int exit_clean(unsigned char *text_stub){
     free(text_stub);
 
     return 0;
+}
+
+void greetz(){
+    printf(
+    "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Developped by nasm - RE =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
+    "Warning : This tool is made for educationals purposes only !\n"
+    "\n"
+    );
 }

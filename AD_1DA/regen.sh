@@ -1,1 +1,1 @@
-cd test_folder/ && gcc test.c -o test_ && cd ../ && cp test_folder/test_ test_ && chmod +x test_
+cd test_folder/ && gcc test.c -o test_ && cd ../ && cp test_folder/test_ test_ && chmod +x test_ && nasm -f elf64 meta_stub_hook.asm -o meta_stub_hook.o && ld meta_stub_hook.o -o meta_stub_hook && nasm -f elf64 meta_stub_hook_no_pie.asm -o meta_stub_hook_no_pie.o && ld meta_stub_hook_no_pie.o -o meta_stub_hook_no_pie && gcc test_folder/test_hook_no_pie_.c -no-pie -o test_folder/test_hook_no_pie_ && cp test_folder/test_hook_no_pie_ test_hook_no_pie_

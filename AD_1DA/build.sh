@@ -1,1 +1,1 @@
-gcc *.c -o main -lbfd -lkeystone -lstdc++ -lm -lcapstone -g && ./regen.sh && nasm -f elf64 test.asm -o test.o && ld test.o -o test && ./test && nasm -f elf64 meta_stub_hook.asm -o meta_stub_hook.o && ld meta_stub_hook.o -o meta_stub_hook
+gcc *.c -o main -lbfd -lkeystone -lstdc++ -lm -lcapstone -g && ./regen.sh && nasm -f elf64 test.asm -o test.o && ld test.o -o test && ./test
