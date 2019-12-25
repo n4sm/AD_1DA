@@ -345,7 +345,13 @@ mov @ REsearch ~/prog_/prog/C-C++/AD_1DA [03:40]
 $ ./test_.p4cked 
 If you can see it, it's that the injection has worked !!
  ```
- 
+
+# Preview
+
+Metamorphic injection with pie : 
+
+![](/images/meta.gif)
+
 # Work in progress ..
 
 Discord -> https://discord.gg/x9Ute4a
