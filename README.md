@@ -32,7 +32,9 @@ Help :
                 ./main -h : Show this help
                 ./main <target_binary> -o <stub to inject>: Basic obfuscation (in work)
                 ./main <target_binary> --add-code-only <stub_to inject>: Add only the executable bytes at the end of the pt_load (not availaible)
+                ./main <target_binary> -m <stub_to inject>: Create a new binary (<target_binary>.p4cked), which will be metamorphic and polymorphic
                 ./main <target_binary> --add-code-only --raw-data <stub_to inject>: * (not availaible)
+                ./main <target_binary> -o <stub_to_inject> -pie: Inject stub_to_inject and patching it as a stub injected in a position independant executable binary
 
 * The stub is automatically an elf but you can indicate the --raw-data options if you want to inject directly assembly instructions from your stub
 ```
