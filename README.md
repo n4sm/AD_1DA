@@ -350,7 +350,7 @@ If you can see it, it's that the injection has worked !!
 
 Metamorphic injection with pie : 
 
-![](/AD_1DA/images/meta.gif)
+![](images/meta.gif)
 
 # Work in progress ..
 
