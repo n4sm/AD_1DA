@@ -341,6 +341,63 @@ mov @ REsearch ~/prog_/prog/C-C++/AD_1DA [03:40]
 $ ./test_.p4cked 
 If you can see it, it's that the injection has worked !!
  ```
+ 
+ Metamorphism for elf without pie : 
+ 
+ ```
+ mov @ REsearch ~/prog_/prog/C-C++/AD_1DA [23:35]
+ $ ./main test_hook_no_pie_ -m meta_stub_hook_no_pie
+ 
+ =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Developped by nasm - RE =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Warning : This tool is made for educationals purposes only !
+
+Raw executables bytes in the stub : 
+        49bd111111111111111141555053515255575641504151415241534889e54881ec90000488d3424488b7d684989f74989fcb82000be0000bafd100f5504889c74c89feb85000f54831ff498b7730ba300041ba20004158415041b90000b89000f557565150415041515048bf6666666666666666481f84889c648b9555555555555555549b90cccccccccccccc4981c1cc00048ad4883ee74c31c84883f8074ce2efb83c0004831fff5448a4694883c694989f648b811111111111111115e50481c65648b98888888888888888514889f7ac4430c0aae2f9595f415a4889fef31481c251ac30d0aae2fa5941881648be7777777777777777488b7d58491fa4152415051ba7000b8a000f5594158584889c64889c7ac4430c0aae2f94159415858595e5f4d8b5f305e4153504989f64c89e75e5a52565652686e61736d488d3c24b82000be42000bafd100f54883c484989c14889c7b810005a5ef54c89c84989c54c89f75e5a574889f74889d6b8b000f55fb83000f5b8570004c89e7f5b830004c89eff5b856000686e61736d488d3c244c89e6f5b857000488d3c24f54881c4900004889ec415b415a415941585e5f5d5a595b58415d49bb11111111111111114d1ddeb8cccccccccccccccc49b844444444444444444c89e8ffe0
+Disassembling the stub : 
+        [movabs]      r13, 0x1111111111111111
+         ...
+        [jmp]      rax
+Second pt_load is found at 0xe10
+The base address of the target binary is 0x400000
+Entry point overwritten : 0x601030
+[*] Generating a new test_hook_no_pie_.p4cked executable file
+Bytes injected at 0x601038: 
+        49bd00400000041555053515255575641504151415241534889e54881ec90000488d3424488b7d684989f74989fcb82000be0000bafd100f5504889c74c89feb85000f54831ff498b7730ba300041ba20004158415041b90000b89000f557565150415041515048bf3010000000481f84889c648b91b200000049b90cccccccccccccc4981c1cc00048ad4883ee74c31c84883f8074ce2efb83c0004831fff5448a4694883c694989f648b8040000005e50481c65648b9721000000514889f7ac4430c0aae2f9595f415a4889fef31481c251ac30d0aae2fa5941881648be107000000488b7d58491fa4152415051ba7000b8a000f5594158584889c64889c7ac4430c0aae2f94159415858595e5f4d8b5f305e4153504989f64c89e75e5a52565652686e61736d488d3c24b82000be42000bafd100f54883c484989c14889c7b810005a5ef54c89c84989c54c89f75e5a574889f74889d6b8b000f55fb83000f5b8570004c89e7f5b830004c89eff5b856000686e61736d488d3c244c89e6f5b857000488d3c24f54881c4900004889ec415b415a415941585e5f5d5a595b58415d49bb040000004d1ddeb8cccccccccccccccc49b8000000004c89e8ffe0
+Length of the stub : 0x21b
+ ```
+ 
+ We can see that we we call demo.sh with this elf (test_hook_no_pie_.p4cked), the result is metamorphic : 
+ 
+ ```
+ 
+ $ ./demo.sh test_hook_no_pie_.p4cked
+ 
+4c95b4184cc13f6b4235d9ab8ada1c09  ./test_hook_no_pie_.p4cked
+532a624053239d8e804e708ac8a0862d  ./test_hook_no_pie_.p4cked
+40b5ce5fd6cbb71df16b7bf57ab6e3f8  ./test_hook_no_pie_.p4cked
+a4f9b5d49b49a975512843f616814ef7  ./test_hook_no_pie_.p4cked
+fbd2e48f4bc7a0fc32092b395cb356c7  ./test_hook_no_pie_.p4cked
+4e1fe04f0d1186b3f2a8e093bd50406d  ./test_hook_no_pie_.p4cked
+61c0abf1fe3d2f64916ee0a3d9fd0df9  ./test_hook_no_pie_.p4cked
+65d9f8100f7444c6070403077c08bacd  ./test_hook_no_pie_.p4cked
+73f7e6dd1382ba8d1cc0b8473cac0fc3  ./test_hook_no_pie_.p4cked
+f0fd18fb11a444c753522d0de4fc3a72  ./test_hook_no_pie_.p4cked
+20048ab4cc6d24a14f069f1a67b6c1fd  ./test_hook_no_pie_.p4cked
+92d4b171fddc7b9e358e3c8cc90b1263  ./test_hook_no_pie_.p4cked
+4c13bfd1d1b18a3629b5296f6b3f006c  ./test_hook_no_pie_.p4cked
+ba95843d040038b92de9b990afdc2e07  ./test_hook_no_pie_.p4cked
+4adaf9fbc20005d0835cb60522d02700  ./test_hook_no_pie_.p4cked
+569f76186dd41b88d1ef4d02d190c38e  ./test_hook_no_pie_.p4cked
+8eee85c41320b0eb6defef6e5a740532  ./test_hook_no_pie_.p4cked
+d7710f79be9927861a255d71ca15ecb6  ./test_hook_no_pie_.p4cked
+9e250a1ca27efa1c1cb53afb3b61533a  ./test_hook_no_pie_.p4cked
+ed4c834ab70b2edd3d90f405572d4f02  ./test_hook_no_pie_.p4cked
+a44d4acd1bf62f5a0b84005ca7f7236d  ./test_hook_no_pie_.p4cked
+843a9da4eaaf774d2fc3f37fde34ed14  ./test_hook_no_pie_.p4cked
+b61271b7ad4cb7e2058c15c07c037c21  ./test_hook_no_pie_.p4cked
+56c47eacf8b3cdf853791d62c67f5dd2  ./test_hook_no_pie_.p4cked
+ 
+ ```
 
 # Preview
 
