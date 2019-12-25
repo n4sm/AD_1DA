@@ -14,7 +14,7 @@
 #include <ctype.h>
 #include <elf.h>
 #include <bfd.h>
-#include <pthread.h> 
+#include <pthread.h>
 
 #include "include.h"
 
@@ -104,18 +104,18 @@ unsigned char *m_new_section(unsigned char *target_pt_load,  unsigned char *targ
         }
         else if (tmp_phdr[i]->p_type == PT_LOAD)
         {
-            // On sait que c'est le deuxieme 
+            // On sait que c'est le deuxieme
 
             tmp_phdr[i]->p_memsz += sz_sec; // Ducoup on change la taille du deuxieme pt_load car c'est là que on va inject la section
-            tmp_phdr[i]->p_filesz += sz_sec;   
-    
+            tmp_phdr[i]->p_filesz += sz_sec;
+
             tmp_phdr[i]->p_flags = 0x7;
 
             scnd_pt = tmp_phdr[i];
 
             break;
         }
-        
+
     }
 
     eh_ptr->e_shoff += sz_sec;
@@ -134,7 +134,7 @@ unsigned char *m_new_section(unsigned char *target_pt_load,  unsigned char *targ
     // ===========
 
     // ===========
-    
+
     // ===========
 
     // Mtn faut tout dumper
@@ -260,7 +260,7 @@ unsigned char *craft_mprotect_memory(ssize_t *len_crafted_stub){
         *len_crafted_stub = size;
 
         return encode;
-        
+
     }
 
     return NULL;

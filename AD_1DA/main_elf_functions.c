@@ -71,11 +71,13 @@ int is_elf(unsigned char *eh_ptr){
 
 // ========================== New main function ============================
 
-int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_sec, unsigned char *stub, ssize_t len_stub){
+int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_sec, unsigned char *stub, ssize_t len_stub, bool pie, bool meta){
 
     struct stat stat_file = {0};
     unsigned char *file_ptr;
     int fd=0;
+    int random_key = 0;
+    ssize_t len_text = 0;
 
     // Elf structure
 
@@ -168,11 +170,6 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
 		    exit(-1);
 	    }
 
-        // ============
-        /*
-        if (inject_code_ovrwrt_ep(filename, name_sec, stub, len_stub)) // aller sur github checher m_extend_code
-            return -1;
-        */
         return 0;
     }
     
@@ -202,23 +199,41 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
 
     // Suivant le pie ou pas 
 
-    if (!has_pie_or_not(buffer_mdata_ph, eh_ptr))
+    off_t offset_text = search_section_name(sh_name_buffer, (Elf64_Ehdr *)address_to_inject, buffer_mdata_sh, ".text", &len_text);
+
+    if (pie == true)
     {
 
         // Si il a le pie on le patch avec certaines values
 
-        if (patch_target(stub, 0x11111111, len_stub, (long)eh_ptr->e_entry) || patch_target(stub, 0x33333333, len_stub, (long)(scnd_pt_load->p_vaddr + scnd_pt_load->p_memsz))) //|| patch_target(stub, 0x22222222, len_stub, (long)0) == -1)
+        if (patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) || patch_target(stub, 0x3333333333333333, len_stub, (long)(scnd_pt_load->p_vaddr + scnd_pt_load->p_filesz)) == -1) //|| patch_target(stub, 0x22222222, len_stub, (long)0) == -1)
         {
-            printf("The stub cannot be patched because the pattern 0x11111111, 0x33333333 and 0x22222222 can't be found\n"); // 0x3333333333333333
+            printf("The stub cannot be patched because the pattern 0x1111111111111111, 0x3333333333333333 can't be found\n");
             exit(-1);
         }
 
         // Et du coup on overwrite l'ep
 
-        tmp_eh_ptr->e_entry = scnd_pt_load->p_vaddr + scnd_pt_load->p_memsz; // Vu que là on est au niveau de la mémoire, on manipule l'addr virtuelle et sa memoty size
+        tmp_eh_ptr->e_entry = scnd_pt_load->p_vaddr + scnd_pt_load->p_filesz; // Vu que là on est au niveau de la mémoire, on manipule l'addr virtuelle et sa memoty size
         printf("The binary has the pie !\n");
-        printf("Entry point rewritten : 0x%lx\n", tmp_eh_ptr->e_entry);
+        printf("Entry point overwritten : 0x%lx\n", tmp_eh_ptr->e_entry);
 
+        // Check if the binary will be metamorphic
+
+        if (meta == true){
+
+            // 1. Patch the stub with specials patterns
+
+            srand(time(NULL)); 
+            random_key = 1 + rand() % (255 - 1 + 1);
+
+            if (patch_target(stub, (long)0x4444444444444444, len_stub, (long)random_key) || patch_target(stub, (long)0x5555555555555555, len_stub, (long)len_stub) || patch_target(stub, (long)0x6666666666666666, len_stub, (long)scnd_pt_load->p_offset + scnd_pt_load->p_filesz) || patch_target(stub, (long)0x7777777777777777, len_stub, (long)phdr_fst_pt->p_memsz) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) || patch_target(stub, (long)0x8888888888888888, len_stub, (long)len_text) == -1)
+            {
+                printf("The stub cannot be patched because the pattern 0x4444444444444444 can't be found\n");
+                exit(-1);
+            }
+
+        }
 
     }
     else
@@ -234,26 +249,24 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
 
         // Du coup on va patch le tout avec certaines autres values
 
-        ssize_t len_crafted_stub;
+        // ssize_t len_crafted_stub;
 
-        unsigned char *stub_crafted = NULL;
+        // unsigned char *stub_crafted = NULL;
         
-        stub_crafted = craft_mprotect_memory(&len_crafted_stub);
+        // stub_crafted = craft_mprotect_memory(&len_crafted_stub);
 
-        if (patch_target(stub_crafted, 0x11111111, len_crafted_stub, (long)eh_ptr->e_entry) == -1)
+        // Ca c'était avant
+
+        if (patch_target(stub, 0x11111111, len_stub, (long)eh_ptr->e_entry) == -1)
         {
             printf("The stub cannot be patched because the pattern 0x11111111 can't be found\n"); // 0x3333333333333333
             exit(-1);
         }
 
-        if (inject_section(stub_crafted, len_crafted_stub, address_to_inject, scnd_pt_load->p_offset + scnd_pt_load->p_filesz))
-        {
-            perror("[ERROR] Exit \n");
-            return -1;
-        }
-
     }
 
+    printf("Scnd pt_load offset : 0x%lx\n", scnd_pt_load->p_offset);
+    printf("Scnd pt_load filesz : 0x%lx\n", scnd_pt_load->p_filesz);
 
     if (inject_section(stub, len_stub, address_to_inject, scnd_pt_load->p_offset + scnd_pt_load->p_filesz))
     {
@@ -261,6 +274,10 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
         return -1;
     }
     
+    if (meta == true){
+        x_pack_text(address_to_inject + offset_text, len_text, random_key);
+    }
+
     // On crée un nouveau fichier pour notre elf
 
     char *name_file_dumped = strcat((char *)filename, name_sec);
@@ -277,7 +294,7 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
     
     // Et là tout ce qu'on a bidouiller avec nos malloc on le met dans ce new fichier
 
-    write(file_dumped, address_to_inject, stat_file.st_size + len_stub);
+    write(file_dumped, address_to_inject, len_stub + scnd_pt_load->p_offset + scnd_pt_load->p_filesz + len_data);
 
     printf("Bytes injected at 0x%lx: \n", scnd_pt_load->p_vaddr + scnd_pt_load->p_memsz);
     printf("\t");
@@ -327,6 +344,8 @@ unsigned char *init_map_and_get_stub(const char *stub_file, ssize_t *len_stub){
     }
 
     unsigned char *stub_ptr = mmap(0, stat_file.st_size, PROT_READ, MAP_SHARED, fd, 0);
+
+    *len_stub = stat_file.st_size;
 
     if (stub_ptr == MAP_FAILED)
     {

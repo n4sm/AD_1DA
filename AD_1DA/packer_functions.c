@@ -24,15 +24,15 @@
 int patch_target(void *p_entry, long pattern, int size, long patch) {
 	
 	p_entry = (unsigned char *)p_entry;
-	int result;
+	long result;
 
 	for(long i = 0 ; i < size; i++)
 	{
-		result = *((int*)(p_entry+i)) ^ pattern;
+		result = *((long*)(p_entry+i)) ^ pattern;
 
 		if(result == 0)
 		{
-			*((int*)(p_entry+i)) = patch;
+			*((long*)(p_entry+i)) = patch;
 			return 0;
 		}
 	}
