@@ -22,10 +22,7 @@
 #include <capstone/capstone.h>
 
 /*
-
-    Bon on réfléchit, 
-
-    On a :
+   We have :
 
     // --------------------------// |
                                     |
@@ -39,19 +36,17 @@
                                     |
     //       Nos sections        // | --------------------------------
                                     |
-    // --------------------------// | ========> 2eme PT_LOAD (mais y'a des sections qui sont pas dedans par exemple la .comment me semble)
-
-    //    Section header table   //   ========> Pas mappé (useless)
+    // --------------------------// | ========> 2eme PT_LOAD 
+    //    Section header table   //   ========> not mapped (useless)
 
     // --------------------------//
 
     Algo : 
 
-        On edit l'ep,
-        On add la taille du 2eme PT_LOAD à sa_len += len_sec (filesisz + memsz) + changer ses perms d'execution
-        On add pas de section header
-        On edit shoff,
-        On add notre code dans scnd_phdr->p_offset + scnd_phdr->p_memsz
+        edit ep,
+        On add len second PT_LOAD to len_scnd_pt_load += len_sec (filesisz + memsz) + edit exec permissions
+        edit shoff,
+        Add code at scnd_phdr->p_offset + scnd_phdr->p_memsz
 
 */
 
