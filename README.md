@@ -10,7 +10,7 @@ AD_1DA is a modern tool made in order to obfuscate your elf binaries.
 
 ```bash
 git clone https://github.com/n4sm/AD_1DA
-cd AD_1DA
+cd AD_1DA/AD_1DA
 chmod +x build.sh
 ./build.sh
 ```
@@ -27,12 +27,17 @@ Next, you have severals binaries :
 Help :
 ```bash
 $ ./main -h
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Developped by nasm - RE =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Warning : This tool is made for educationals purposes only !
+
 AD_1DA is a modern tool made in order to obfuscate your elf binaries
 Help : 
+                ./main <target_binary> [OPTIONS] <stub_to_inject> -v: Inject stub_to_inject and patching it as a stub injected in an elf with OPTIONS without the disassembly
                 ./main -h : Show this help
                 ./main <target_binary> -o <stub to inject>: Basic obfuscation (in work)
                 ./main <target_binary> -m <stub_to inject>: Create a new binary (<target_binary>.p4cked), which will be metamorphic and polymorphic
                 ./main <target_binary> -o <stub_to_inject> -pie: Inject stub_to_inject and patching it as a stub injected in a position independant executable binary
+                ./main <target_binary> -o <stub_to_inject>: Inject stub_to_inject and patching it as a stub injected in an elf
 ```
 
 Usage : 
