@@ -97,9 +97,8 @@ unsigned char *m_new_section(unsigned char *target_pt_load,  unsigned char *targ
         }
         else if (tmp_phdr[i]->p_type == PT_LOAD)
         {
-            // We know that it's teh second
 
-            tmp_phdr[i]->p_memsz += sz_sec; // We change the length of the second pt_load where we will inject our section
+            tmp_phdr[i]->p_memsz += sz_sec; 
             tmp_phdr[i]->p_filesz += sz_sec;
 
             tmp_phdr[i]->p_flags = 0x7;
@@ -113,19 +112,11 @@ unsigned char *m_new_section(unsigned char *target_pt_load,  unsigned char *targ
 
     eh_ptr->e_shoff += sz_sec;
 
-    */
-
-    // ===========
-
-    // ===========
-
-    // ===========
-
     unsigned char *dumped_data = malloc(len_target_file + sz_sec);
 
     memcpy(dumped_data, target_pt_load, len_target_file - len_data);
 
-    memcpy(dumped_data + len_target_file - len_data + sz_sec, target_scnd_pt_load, len_data)
+    memcpy(dumped_data + len_target_file - len_data + sz_sec, target_scnd_pt_load, len_data);
 
     return dumped_data;
 
@@ -190,45 +181,3 @@ int rewrite_ep(Elf64_Ehdr *eh_ptr, Elf64_Phdr *buffer_mdata_ph[], Elf64_Shdr *bu
 }
 
 // ===================================================================================================================================
-
-unsigned char *craft_mprotect_memory(ssize_t *len_crafted_stub){
-
-    ks_engine *ks;
-    ks_err error;
-    size_t count;
-    unsigned char *encode;
-    size_t size;
-
-    printf("Crafting stub with keystone : \n");
-
-    if((error = ks_open(KS_ARCH_X86, KS_MODE_64, &ks)) != KS_ERR_OK){
-        printf("ERROR: failed on ks_open(), quit\n");
-        return (unsigned char *)-1;
-    }
-
-    if (ks_asm(ks, CODE_MPROTECT, 0, &encode, &size, &count) != KS_ERR_OK)
-    {
-        printf("ERROR: ks_asm() failed & count = %lu, error = %u\n", count, ks_errno(ks));
-    }
-    else
-    {
-        printf("\t");
-
-        for (size_t i = 0; i < size; i++)
-        {
-            printf("%2x ", *(encode + i));
-        }
-
-        printf("\n");
-
-        ks_free(encode);
-        ks_close(ks);
-
-        *len_crafted_stub = size;
-
-        return encode;
-
-    }
-
-    return NULL;
-}
