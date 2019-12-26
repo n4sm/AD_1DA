@@ -21,7 +21,9 @@ Next, you have severals binaries:
 
 **test_  :    which is a target C binary (you can look at /test_folder/test.c)**
 
-**test   :    which is a nasm binary that will be injected in the target file (only the .text)**
+**meta_stub_hook   :    which is a nasm binary that will be injected in the target file (only the .text) for metamorphism**
+
+**meta_stub_hook_no_pie   :    which is a nasm binary that will be injected in the target file (only the .text) for metamorphism for non based pie binaries**
 
 ## Utilisation
 Help:
