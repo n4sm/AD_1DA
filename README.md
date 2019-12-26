@@ -377,30 +377,16 @@ Length of the stub : 0x21b
  
  $ ./demo.sh test_hook_no_pie_.p4cked
  
-4c95b4184cc13f6b4235d9ab8ada1c09  ./test_hook_no_pie_.p4cked
-532a624053239d8e804e708ac8a0862d  ./test_hook_no_pie_.p4cked
-40b5ce5fd6cbb71df16b7bf57ab6e3f8  ./test_hook_no_pie_.p4cked
-a4f9b5d49b49a975512843f616814ef7  ./test_hook_no_pie_.p4cked
-fbd2e48f4bc7a0fc32092b395cb356c7  ./test_hook_no_pie_.p4cked
-4e1fe04f0d1186b3f2a8e093bd50406d  ./test_hook_no_pie_.p4cked
-61c0abf1fe3d2f64916ee0a3d9fd0df9  ./test_hook_no_pie_.p4cked
-65d9f8100f7444c6070403077c08bacd  ./test_hook_no_pie_.p4cked
-73f7e6dd1382ba8d1cc0b8473cac0fc3  ./test_hook_no_pie_.p4cked
-f0fd18fb11a444c753522d0de4fc3a72  ./test_hook_no_pie_.p4cked
-20048ab4cc6d24a14f069f1a67b6c1fd  ./test_hook_no_pie_.p4cked
-92d4b171fddc7b9e358e3c8cc90b1263  ./test_hook_no_pie_.p4cked
-4c13bfd1d1b18a3629b5296f6b3f006c  ./test_hook_no_pie_.p4cked
-ba95843d040038b92de9b990afdc2e07  ./test_hook_no_pie_.p4cked
-4adaf9fbc20005d0835cb60522d02700  ./test_hook_no_pie_.p4cked
-569f76186dd41b88d1ef4d02d190c38e  ./test_hook_no_pie_.p4cked
-8eee85c41320b0eb6defef6e5a740532  ./test_hook_no_pie_.p4cked
-d7710f79be9927861a255d71ca15ecb6  ./test_hook_no_pie_.p4cked
-9e250a1ca27efa1c1cb53afb3b61533a  ./test_hook_no_pie_.p4cked
-ed4c834ab70b2edd3d90f405572d4f02  ./test_hook_no_pie_.p4cked
-a44d4acd1bf62f5a0b84005ca7f7236d  ./test_hook_no_pie_.p4cked
-843a9da4eaaf774d2fc3f37fde34ed14  ./test_hook_no_pie_.p4cked
-b61271b7ad4cb7e2058c15c07c037c21  ./test_hook_no_pie_.p4cked
-56c47eacf8b3cdf853791d62c67f5dd2  ./test_hook_no_pie_.p4cked
+❯ ./demo.sh test_hook_no_pie_.p4cked
+1 md5 : dcb087d385591d4db31cad22f8b89eb4  test_hook_no_pie_.p4cked
+2 md5 : 04e0655c3d84a5e1e5c526df7f98137f  test_hook_no_pie_.p4cked
+3 md5 : 306f122451f342ff048a78623e8cec08  test_hook_no_pie_.p4cked
+4 md5 : 463aefe028a44492ddaae568b69848dd  test_hook_no_pie_.p4cked
+5 md5 : 0b3ab86b04fa638f09f877d8f4edbab9  test_hook_no_pie_.p4cked
+6 md5 : b2859f18e208c3857a4a2c3d733c911d  test_hook_no_pie_.p4cked
+7 md5 : 472a89f0dc1b2b57bfadd525a7e089a5  test_hook_no_pie_.p4cked
+8 md5 : 8a88279075e671b3855e1b3d537627db  test_hook_no_pie_.p4cked
+9 md5 : 93b304244f9ec22b5b3392087a9fde30  test_hook_no_pie_.p4cked
  
  ```
 
