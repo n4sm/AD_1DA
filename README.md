@@ -15,7 +15,7 @@ chmod +x build.sh
 ./build.sh
 ```
 
-Next, you have severals binaries : 
+Next, you have severals binaries: 
 
 **main   :    which is the main binary ( type ./main -h )**
 
@@ -24,7 +24,7 @@ Next, you have severals binaries :
 **test   :    which is a nasm binary that will be injected in the target file (only the .text)**
 
 ## Utilisation
-Help :
+Help:
 ```bash
 $ ./main -h
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Developped by nasm - RE =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -40,14 +40,14 @@ Help :
                 ./main <target_binary> -o <stub_to_inject>: Inject stub_to_inject and patching it as a stub injected in an elf
 ```
 
-Usage : 
+Usag: 
 ```bash
 $ ./main
 Usage : ./main <target_file> <option> <stub_to_inject>
 Help : ./main -h
 ```
 
-Inject code :
+Inject code:
 
 ```bash
 $ ./main test_ -o test_hook
@@ -103,7 +103,7 @@ It will inject test_hook in test_.
 **Warning : the stub that you want to inject must be a file developped in assembly file which must be executable**
 
 
-Metamorphism : 
+Metamorphism: 
 
 ```
 
@@ -317,7 +317,7 @@ Bytes injected at 0x2010c8:
 Length of the stub : 0x22a
 ```
 
-The binary test_.p4cked is now poly/metamorphic : 
+The binary test_.p4cked is now poly/metamorphic: 
 
 ```bash
 
@@ -347,7 +347,7 @@ $ ./test_.p4cked
 If you can see it, it's that the injection has worked !!
  ```
  
- Metamorphism for elf without pie : 
+ Metamorphism for elf without pie: 
  
  ```
  mov @ REsearch ~/prog_/prog/C-C++/AD_1DA [23:35]
@@ -371,7 +371,7 @@ Bytes injected at 0x601038:
 Length of the stub : 0x21b
  ```
  
- We can see that we we call demo.sh with this elf (test_hook_no_pie_.p4cked), the result is metamorphic : 
+ We can see that we we call demo.sh with this elf (test_hook_no_pie_.p4cked), the result is metamorphic: 
  
  ```
  
@@ -406,7 +406,7 @@ b61271b7ad4cb7e2058c15c07c037c21  ./test_hook_no_pie_.p4cked
 
 # Preview
 
-Metamorphic injection with pie : 
+Metamorphic injection with pie: 
 
 ![](meta.gif)
 
