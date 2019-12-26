@@ -136,7 +136,6 @@ __edit_key:
     ; =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
     mov rsi, 0x7777777777777777 ; len fst pt load
-
     mov rdi, 0x9999999999999999 ; offset 2nd pt_load
 
     push rsi
@@ -153,20 +152,48 @@ __edit_key:
     add rsi, rax ; addr -> code cave
     mov rdi, rsi
 
+    sub rsp, 0x10
+    mov dword [rsp], '/dev'
+    mov dword [rsp+4], '/uran'
+    mov dword [rsp+8], 'ndom'
+    mov dword [rsp+12], 0x0000
+
 __loop_random_bytes:
-    rdtsc
-    add edx, eax
-    push rdx
-    
-    rdtsc
-    add eax, edx
-    
-    pop rdx
-    xor dl, al
+    push rsi
+    push rdi
+    push rcx
+
+    mov rax, 0x2
+    lea rdi, [rsp+24] ; pointeur vers /dev/urandom
+    mov rsi, 0x0 ; 0_RD
+    mov rdx, 509
+    syscall ; open
+
+    ; Now we gonna read this dandom number
+
+    mov rdi, rax
+    xor rax, rax
+    sub rsp, 0x8
+    lea rsi, [rsp]
+    mov rdx, 0x1
+    syscall
+
+    mov dl, byte [rsi] ; get random number in dl
+    xor rdi, rdi
+
+    add rsp, 0x8
+
+    pop rcx
+    pop rdi
+    pop rsi
 
     lodsb
     xor al, dl
     stosb
+
+    loop __loop_random_bytes
+
+    add rsp, 0x10
 
     pop rax
     pop rcx
