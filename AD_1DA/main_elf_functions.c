@@ -117,7 +117,7 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
     char *sh_name_buffer[eh_ptr->e_shnum];
     
     off_t offset = 0;
-	Elf64_Shdr *shstrtab_header;
+    Elf64_Shdr *shstrtab_header;
 
     shstrtab_header = (Elf64_Shdr *)((char *)file_ptr + eh_ptr->e_shoff + eh_ptr->e_shentsize * eh_ptr->e_shstrndx);
 
@@ -210,7 +210,7 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
 
         tmp_eh_ptr->e_entry = scnd_pt_load->p_vaddr + scnd_pt_load->p_filesz; // Vu que là on est au niveau de la mémoire, on manipule l'addr virtuelle et sa memoty size
         printf("The binary has the pie !\n");
-        printf("Entry point overwritten : 0x%lx\n", tmp_eh_ptr->e_entry);
+        printf("Entry point overwritten : %lx\n", tmp_eh_ptr->e_entry);
 
         // Check if the binary will be metamorphic
 
@@ -222,6 +222,7 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
             random_key = 1 + rand() % (255 - 1 + 1);
 
             printf("Code cave length : 0x%lx\n", scnd_pt_load->p_offset - phdr_fst_pt->p_filesz);
+            printf("This binary will have %ld possible hashes\n", 256 * (scnd_pt_load->p_offset - phdr_fst_pt->p_filesz + 1));
 
             if (patch_target(stub, (long)0x4444444444444444, len_stub, (long)random_key) || patch_target(stub, (long)0x5555555555555555, len_stub, (long)len_stub) || patch_target(stub, (long)0x6666666666666666, len_stub, (long)scnd_pt_load->p_offset + scnd_pt_load->p_filesz) || patch_target(stub, (long)0x7777777777777777, len_stub, (long)phdr_fst_pt->p_memsz) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) || patch_target(stub, (long)0x8888888888888888, len_stub, (long)len_text) || patch_target(stub, (long)0x9999999999999999, len_stub, (long)scnd_pt_load->p_offset) == -1)
             {
@@ -252,6 +253,7 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
             random_key = 1 + rand() % (255 - 1 + 1);
 
             printf("Code cave length : 0x%lx\n", scnd_pt_load->p_offset - phdr_fst_pt->p_filesz);
+            printf("This binary will have %ld possible hashes\n", 265 * (scnd_pt_load->p_offset - phdr_fst_pt->p_filesz + 1));
 
             if (patch_target(stub, (long)0x4444444444444444, len_stub, (long)random_key) || patch_target(stub, (long)0x5555555555555555, len_stub, (long)len_stub) || patch_target(stub, (long)0x6666666666666666, len_stub, (long)scnd_pt_load->p_offset + scnd_pt_load->p_filesz) || patch_target(stub, (long)0x7777777777777777, len_stub, (long)phdr_fst_pt->p_memsz) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) || patch_target(stub, (long)0x8888888888888888, len_stub, (long)len_text) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) || patch_target(stub, (long)0x9999999999999999, len_stub, (long)scnd_pt_load->p_offset) == -1)
             {
