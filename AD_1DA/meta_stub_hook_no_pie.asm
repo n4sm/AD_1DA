@@ -116,9 +116,51 @@ __loop_decrypt:
     pop r10 ; offset .text
     mov rsi, rdi ; addr .text mappedsss
 
-    rdtsc ; "random" number in -> eax:edx
+    ; =-=-=-=-=-=-=-=-=- /dev/urandom =-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-    add rdx, rax ; New key
+    push rax
+    push rdi
+    push rsi
+    push rcx
+
+    sub rsp, 0x10
+    mov dword [rsp], '/dev'
+    mov dword [rsp+4], '/uran'
+    mov dword [rsp+8], 'ndom'
+    mov dword [rsp+12], 0x0000
+
+
+    mov rax, 0x2
+    lea rdi, [rsp] ; pointeur vers /dev/urandom
+    mov rsi, 0x0 ; 0_RD
+    mov rdx, 509
+    syscall ; open
+
+    ; Now we gonna read this random number
+
+    mov rdi, rax
+    xor rax, rax
+    sub rsp, 0x8
+    lea rsi, [rsp]
+    mov rdx, 0x1
+    syscall ; sys read
+
+    mov dl, byte [rsi] ; get random number in dl
+
+    ; Now we gonna close the file descriptor
+
+    mov rax, 3
+    syscall
+
+    add rsp, 0x8
+    add rsp, 0x10
+
+    pop rcx
+    pop rsi
+    pop rdi
+    pop rax
+
+    ; =-=-=-=-=-=-=-=-=- /dev/urandom =-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
     push rcx
 

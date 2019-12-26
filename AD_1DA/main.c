@@ -112,16 +112,6 @@ int main(int argc, char **argv){
         exit_clean(text_stub);
     }
 
-    else if (argc == 4+1 && !strcmp(argv[2], "-m") && !strcmp(argv[4], "-v"))
-    {
-        ssize_t len_stub = 0;
-        unsigned char *text_stub = init_map_and_get_stub(argv[3], &len_stub, true);
-
-        add_section_ovrwrte_ep_inject_code(argv[1], ".p4cked", text_stub, len_stub, false, true);
-
-        exit_clean(text_stub);
-    }
-
     else
     {
         show_help(argv);
