@@ -188,7 +188,11 @@ __loop_random_bytes:
     syscall
 
     mov dl, byte [rsi] ; get random number in dl
-    xor rdi, rdi
+
+    ; Now we gonna close the file descriptor
+
+    mov rax, 3
+    syscall
 
     add rsp, 0x8
 
