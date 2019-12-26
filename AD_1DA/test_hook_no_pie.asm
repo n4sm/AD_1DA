@@ -51,8 +51,5 @@ _start:
     pop rbx
     pop rax
 
-    mov rax, 0x11111111 ; pattern 0x11111111 for the begin of the .text
-    add rax, r12
-    ;add rax, 2
-    ;sub rax, 0x200000
+    mov rax, 0x1111111111111111 ; pattern 0x11111111 for the begin of the .text
     jmp rax

@@ -140,7 +140,48 @@ __edit_key:
 
     ; =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+     ; garbage bytes between the first and the second pt_load
+
+     ; =-=-=-=-=-=
+
     mov rsi, 0x7777777777777777 ; len fst pt load
+    mov rdi, 0x9999999999999999 ; offset 2nd pt_load
+
+    push rsi
+    push rdi
+    push rcx
+    push rax
+
+    sub rdi, rsi ; len where we gonna insert our "random" bytes
+
+    mov rcx, rdi ; len where we gonna insert our "random" bytes
+
+    mov rax, [rbp-184] ; A check (addr where the file is mapped)
+
+    add rsi, rax ; addr -> code cave
+    mov rdi, rsi
+
+__loop_random_bytes:
+    rdtsc
+    add edx, eax
+    push rdx
+    
+    rdtsc
+    add eax, edx
+    
+    pop rdx
+    xor dl, al
+
+    lodsb
+    xor al, dl
+    stosb
+
+    pop rax
+    pop rcx
+    pop rdi
+    pop rsi
+
+    ; =-=-=-=-=-=
 
     mov rdi, qword [rbp+88] ; base address (begin pt load)
     add r10, rdi ; addr at runtime of the .text à unpack
@@ -298,8 +339,8 @@ __int3:
     int3
 
 __ehe:
-    mov r8, 0x4444444444444444 ; key
-
+    mov r8, 0x4444444444444444 ; key_text
+    
     ; In asm : 
     ;int3                         ; +0 = cc 
     ;int3                         ; +1 = cc 

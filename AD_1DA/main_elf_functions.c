@@ -221,7 +221,9 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
             srand(time(NULL)); 
             random_key = 1 + rand() % (255 - 1 + 1);
 
-            if (patch_target(stub, (long)0x4444444444444444, len_stub, (long)random_key) || patch_target(stub, (long)0x5555555555555555, len_stub, (long)len_stub) || patch_target(stub, (long)0x6666666666666666, len_stub, (long)scnd_pt_load->p_offset + scnd_pt_load->p_filesz) || patch_target(stub, (long)0x7777777777777777, len_stub, (long)phdr_fst_pt->p_memsz) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) || patch_target(stub, (long)0x8888888888888888, len_stub, (long)len_text) == -1)
+            printf("Code cave length : 0x%lx\n", scnd_pt_load->p_offset - phdr_fst_pt->p_filesz);
+
+            if (patch_target(stub, (long)0x4444444444444444, len_stub, (long)random_key) || patch_target(stub, (long)0x5555555555555555, len_stub, (long)len_stub) || patch_target(stub, (long)0x6666666666666666, len_stub, (long)scnd_pt_load->p_offset + scnd_pt_load->p_filesz) || patch_target(stub, (long)0x7777777777777777, len_stub, (long)phdr_fst_pt->p_memsz) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) || patch_target(stub, (long)0x8888888888888888, len_stub, (long)len_text) || patch_target(stub, (long)0x9999999999999999, len_stub, (long)scnd_pt_load->p_offset) == -1)
             {
                 printf("The stub cannot be patched because the pattern 0x4444444444444444 can't be found\n");
                 exit(-1);
@@ -246,7 +248,12 @@ int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_se
         }
 
         if (meta == true){
-            if (patch_target(stub, (long)0x4444444444444444, len_stub, (long)random_key) || patch_target(stub, (long)0x5555555555555555, len_stub, (long)len_stub) || patch_target(stub, (long)0x6666666666666666, len_stub, (long)scnd_pt_load->p_offset + scnd_pt_load->p_filesz) || patch_target(stub, (long)0x7777777777777777, len_stub, (long)phdr_fst_pt->p_memsz) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) || patch_target(stub, (long)0x8888888888888888, len_stub, (long)len_text) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) == -1)
+            srand(time(NULL)); 
+            random_key = 1 + rand() % (255 - 1 + 1);
+
+            printf("Code cave length : 0x%lx\n", scnd_pt_load->p_offset - phdr_fst_pt->p_filesz);
+
+            if (patch_target(stub, (long)0x4444444444444444, len_stub, (long)random_key) || patch_target(stub, (long)0x5555555555555555, len_stub, (long)len_stub) || patch_target(stub, (long)0x6666666666666666, len_stub, (long)scnd_pt_load->p_offset + scnd_pt_load->p_filesz) || patch_target(stub, (long)0x7777777777777777, len_stub, (long)phdr_fst_pt->p_memsz) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) || patch_target(stub, (long)0x8888888888888888, len_stub, (long)len_text) || patch_target(stub, (long)0x1111111111111111, len_stub, (long)offset_text) || patch_target(stub, (long)0x9999999999999999, len_stub, (long)scnd_pt_load->p_offset) == -1)
             {
                 printf("The stub cannot be patched because the pattern 0x4444444444444444 can't be found\n");
                 exit(-1);
