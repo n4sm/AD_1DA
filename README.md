@@ -377,7 +377,6 @@ Length of the stub : 0x21b
  
  $ ./demo.sh test_hook_no_pie_.p4cked
  
-❯ ./demo.sh test_hook_no_pie_.p4cked
 1 md5 : dcb087d385591d4db31cad22f8b89eb4  test_hook_no_pie_.p4cked
 2 md5 : 04e0655c3d84a5e1e5c526df7f98137f  test_hook_no_pie_.p4cked
 3 md5 : 306f122451f342ff048a78623e8cec08  test_hook_no_pie_.p4cked
