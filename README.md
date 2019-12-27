@@ -19,7 +19,7 @@ Next, you have severals binaries:
 
 **main   :    which is the main binary ( type ./main -h )**
 
-**test_  :    which is a target C binary (you can look at /test_folder/test.c)**
+**test_hook  :    which is a target C binary (you can look at /test_folder/test.c)**
 
 **meta_stub_hook   :    which is a nasm binary that will be injected in the target file (only the .text) for metamorphism**
 
