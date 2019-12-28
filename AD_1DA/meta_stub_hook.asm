@@ -130,7 +130,7 @@ __loop_decrypt:
 
     sub rsp, 0x10
     mov dword [rsp], '/dev'
-    mov dword [rsp+4], '/uran'
+    mov dword [rsp+4], '/ura'
     mov dword [rsp+8], 'ndom'
     mov dword [rsp+12], 0x0000
 
@@ -205,7 +205,7 @@ __edit_key:
 
     sub rsp, 0x10
     mov dword [rsp], '/dev'
-    mov dword [rsp+4], '/uran'
+    mov dword [rsp+4], '/ura'
     mov dword [rsp+8], 'ndom'
     mov dword [rsp+12], 0x0000
 
