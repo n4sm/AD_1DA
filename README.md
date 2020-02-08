@@ -398,7 +398,7 @@ Metamorphic injection with pie:
 
 # Work in progress ..
 
-Discord -> https://discord.gg/x9Ute4a
+Discord -> https://discord.gg/uTn648G
 
 ## Requirements
 
