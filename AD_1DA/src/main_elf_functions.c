@@ -173,9 +173,17 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
     printf("0x%lx (memory), 0x%lx (file)\n", offset_text, offt_text_ifile);
 
     if (meta) {
-        srand(time(NULL));
-        random_key = 1 + rand() % (255 - 1 + 1);
+        char tmp[0x100];
+        int fd_rand = open("/dev/urandom", O_RDONLY);
+
+        if (fd_rand < 0) {
+            log_ad("Fatal fd_rand\n", FAILURE);
+        }
+
+        read(fd_rand, tmp, 0x100);
+        random_key = tmp[0x50] & 0xff;
     }
+
     // Pie or not
     if (pie) {
         // Either the pie or not, so we patch the stub with few values
