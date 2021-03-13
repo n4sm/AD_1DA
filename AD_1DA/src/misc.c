@@ -138,3 +138,39 @@ typedef struct
     Elf64_Half	e_shstrndx;
 } Elf64_Ehdr;
 */
+
+// *=*=*=*=*=*=*=*
+
+int disass_raw(unsigned char *raw_bytes, ssize_t len_raw_code) {
+
+    csh handle;
+    cs_insn *instruction;
+    ssize_t count_insn;
+
+    if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
+        return -1;
+    }
+
+    count_insn = cs_disasm(handle, raw_bytes, len_raw_code, 0x0, 0x0, &instruction);
+
+    if (count_insn > 0) {
+        for (size_t i = 0; i < count_insn; i++) {
+            if (*instruction[i].op_str == '\0' && strcmp(instruction[i].mnemonic, "int3\0")) {
+                printf("\t[%s]\t_\n", instruction[i].mnemonic);
+            } else if (*instruction[i].op_str == '\0') {
+                printf("\t[%s]\t\t_\n", instruction[i].mnemonic);
+            } else if (strcmp(instruction[i].mnemonic, "movabs\0")) {
+                printf("\t[%s]", instruction[i].mnemonic);
+                printf("\t\t%s\n", instruction[i].op_str);
+            } else {
+                printf("\t[%s]", instruction[i].mnemonic);
+                printf("\t%s\n", instruction[i].op_str);
+            }
+        }
+        cs_free(instruction, count_insn);
+    }
+
+    cs_close(&handle);
+
+    return 0;
+}
