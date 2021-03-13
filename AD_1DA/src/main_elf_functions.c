@@ -178,6 +178,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
 
         if (fd_rand < 0) {
             log_ad("Fatal fd_rand\n", FAILURE);
+            return -1;
         }
 
         read(fd_rand, tmp, 0x100);
