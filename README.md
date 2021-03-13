@@ -8,7 +8,7 @@ AD_1DA is a modern tool made in order to obfuscate your elf binaries.
 
 ```bash
 git clone https://github.com/n4sm/AD_1DA
-make
+cd AD_1DA && make
 ```
 
 ### Utilisation
@@ -1170,7 +1170,7 @@ $ ./demo.sh test_hook_no_pie_.p4cked
 9 md5 : 3d516bdbc8c803fbc7e30bd728848862  test_folder/test_c.x
  ```
 
-###Work in progress ..
+### Work in progress ..
 
 Discord -> https://0xthxmxs.github.io/discord 
 
