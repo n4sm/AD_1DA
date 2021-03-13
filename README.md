@@ -468,16 +468,16 @@ rm stub/*.o | rm test_folder/*.o test_folder/test_c test_folder/test stub/meta_s
 ```
 
  ```
-$ ./demo.sh test_hook_no_pie_.p4cked
-1 md5 : 2a816ce5190681b8ee795cedbc8a939f  test_folder/test_c.x
-2 md5 : 575d9fbcc02ee5a7507c4d42fc119258  test_folder/test_c.x
-3 md5 : 991491bea38c7b9a2d9cfdc6a010b52e  test_folder/test_c.x
-4 md5 : db7274206112f168e4db2161c1ba62d6  test_folder/test_c.x
-5 md5 : 68a6949a7fb0ec5f80e52e82df6b2a93  test_folder/test_c.x
-6 md5 : ff2a74feae79527cc98257e546a97915  test_folder/test_c.x
-7 md5 : 6c2fd82e3be58c7535d61aa5434684eb  test_folder/test_c.x
-8 md5 : 4b75a6500a31e803a262ed12aff20d75  test_folder/test_c.x
-9 md5 : 3d516bdbc8c803fbc7e30bd728848862  test_folder/test_c.x
+$ ./test_folder/demo.sh test_folder/test_c.x                                                                                                          ✹ ✭master 
+  1 md5 : cb49e9b2906fd55778a01545b100d075  test_folder/test_c.x
+  2 md5 : 39253b98c5d6937d129754482c7831ce  test_folder/test_c.x
+  3 md5 : f2647206f30f71064d62a1a425de1cd2  test_folder/test_c.x
+  4 md5 : 31edccf3740d8b5850850e432ad6019e  test_folder/test_c.x
+  5 md5 : 7035f8a13c738c8b2424f6f1150786ba  test_folder/test_c.x
+  6 md5 : 6d8ff112336480341c70c473df6299cb  test_folder/test_c.x
+  7 md5 : 3e553ecc165ed66934f7d63f07b2cdd8  test_folder/test_c.x
+  8 md5 : 62598a01a2f4bb2ec0b941b1133d0b8f  test_folder/test_c.x
+  9 md5 : abe0498cf9a071fb7725ee5a36996678  test_folder/test_c.x
  ```
 
 ### Work in progress ..
