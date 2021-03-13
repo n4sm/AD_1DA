@@ -11,9 +11,8 @@ git clone https://github.com/n4sm/AD_1DA
 cd AD_1DA && make
 ```
 
-### Utilisation
+### Usage
 
-Help:
 ```bash
 $ ./main
 Usage ./main <target> (option) *stub* |layer|
@@ -25,6 +24,8 @@ stub:
 layer:
 	Number of layer you want for the final binary (base 16)
 ```
+
+For example with a PIE based binary with the use of the stub/meta_stub_hook.asm stub with 10 layers of packing:
 
 ```bash
 $ ./main test_folder/test_c -m stub/meta_stub_hook 10
