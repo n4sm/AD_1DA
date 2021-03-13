@@ -481,7 +481,6 @@ unsigned char *init_map_and_get_stub(const char *stub_filename, ssize_t *len_stu
 int init_binary(const char *filename, mdata_binary_t *s_binary, unsigned char *stub, ssize_t len_stub) {
     struct stat st;
 
-    printf("%s\n", filename);
     memset(s_binary, 0x0, sizeof(mdata_binary_t));
 
     if ((s_binary->fd = open(filename, O_RDWR)) == -1) {

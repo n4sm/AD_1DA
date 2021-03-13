@@ -28,4 +28,4 @@ run: stub/meta_stub_hook
 	./main test_folder/test_c -m stub/meta_stub_hook 10
 
 clean:
-	rm stub/*.o | rm test_folder/*.o test_folder/test_c | rm *.o
+	rm stub/*.o | rm test_folder/*.o test_folder/test_c

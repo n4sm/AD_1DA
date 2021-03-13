@@ -62,7 +62,6 @@ int main(int argc, char **argv){
     }
 
     unsigned char *stub = init_map_and_get_stub(argv[3], &len_stub, true);
-    printf("%s\n", argv[1]);
     wrapper_layer(argv[1], ".x", stub, len_stub, meta, layer, x_pack_text);
 
     free(stub);
