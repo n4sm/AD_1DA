@@ -190,7 +190,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
                          0x1010101010101010, // entry point
                          s_binary->len_stub,
                          (unsigned long)(eh_ptr->e_entry))) {
-            exit(-1);
+            return -1;
         }
 
         log_ad("Virtual address of the stub: ", SUCCESS);
@@ -240,7 +240,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
                              (unsigned long)0x9999999999999999, // virtual last PT_LOAD offt
                              s_binary->len_stub,
                              (unsigned long)last_pt_load->p_offset) == -1) {
-                printf("The stub cannot be patched because the pattern 0x4444444444444444 can't be found\n");
+                printf("The stub cannot be patched because some pattern cannot be found\n");
                 exit(-1);
             }
         }
@@ -265,7 +265,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
                          (unsigned long )0x3333333333333333,
                          s_binary->len_stub,
                          (unsigned long)base_addr)) {
-            log_ad("The stub cannot be patched because the pattern 0x1111111111111111 can't be found\n", FAILURE); // 0x3333333333333333
+            log_ad("The stub cannot be patched because the pattern 0x3333333333333333 can't be found\n", FAILURE); // 0x3333333333333333
             exit(-1);
         }
 
@@ -305,7 +305,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
                              (unsigned long)0x9999999999999999, // offset last PT_LOAD
                              s_binary->len_stub,
                              (unsigned long)last_pt_load->p_offset)) { // offset NOT at runtime
-                exit(-1);
+                return -1;
             }
         }
     }
