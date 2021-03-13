@@ -19,5 +19,3 @@ _start:
     mov rax, 60
     mov rdi, 0x0
     syscall
-
-

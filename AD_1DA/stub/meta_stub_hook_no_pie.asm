@@ -5,7 +5,7 @@ section .text
 
 _start:
 
-    mov r13, 0x1111111111111111
+    mov r13, 0x3333333333333333
     push r13 ; base address
 
     ; Pushing all the registers in order to save the context
@@ -114,7 +114,7 @@ __loop_decrypt:
     pop rcx ; len_text
     pop rdi ; addr .text mapped
     pop r10 ; offset .text
-    mov rsi, rdi ; addr .text mappedsss
+    mov rsi, rdi ; addr .text mapped
 
     ; =-=-=-=-=-=-=-=-=- /dev/urandom =-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -128,7 +128,6 @@ __loop_decrypt:
     mov dword [rsp+4], '/uran'
     mov dword [rsp+8], 'ndom'
     mov dword [rsp+12], 0x0000
-
 
     mov rax, 0x2
     lea rdi, [rsp] ; pointeur vers /dev/urandom
@@ -162,7 +161,8 @@ __loop_decrypt:
 
     ; =-=-=-=-=-=-=-=-=- /dev/urandom =-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-    push rcx
+    push rcx ; length
+    xor rax, rax
 
 __loop_encrypt:
     lodsb
@@ -177,7 +177,7 @@ __edit_key:
 
     ; =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-    mov rsi, 0x7777777777777777 ; len fst pt load
+    mov rsi, 0x7777777777777777 ; beg garbage
     mov rdi, 0x9999999999999999 ; offset 2nd pt_load
 
     push rsi
@@ -213,30 +213,29 @@ __loop_random_bytes:
 
     ; Now we gonna read this dandom number
 
-    mov rdi, rax
-    xor rax, rax
+    mov rdi, rax ; fd
+    xor rax, rax ; 0
     sub rsp, 0x8
-    lea rsi, [rsp]
-    mov rdx, 0x1
-    syscall
+    lea rsi, [rsp] ; buf
+    mov rdx, 0x1 ; mode
+    syscall ; sys_open
 
     mov dl, byte [rsi] ; get random number in dl
 
     ; Now we gonna close the file descriptor
 
-    mov rax, 3
+    mov rax, 3 ; sys_close
     syscall
 
     add rsp, 0x8
 
-    pop rcx
-    pop rdi
-    pop rsi
+    pop rcx ; length
+    pop rdi ; addr cave
+    pop rsi ; -
 
     lodsb
     xor al, dl
     stosb
-
     loop __loop_random_bytes
 
     add rsp, 0x10
@@ -252,6 +251,7 @@ __loop_random_bytes:
     ; Don't forget the mprotect
 
     push r10 ; addr virtual .text
+    mov rdi, r10
     push r8 ; key
 
     push rcx
@@ -290,8 +290,6 @@ __decrypt_runtime:
     push r11 ; len file
     push rax ; addr
     mov r14, rsi
-
-    
 
     mov rdi, r12 ; pathname
     pop rsi ; addr
@@ -378,14 +376,7 @@ __decrypt_runtime:
     pop rcx
     pop rbx
     pop rax
-
-    ; =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    ; Unpacking stub
-
-    pop r13 ; base address
-    mov r11, 0x1111111111111111
-    add r13, r11
+    pop r13
 
     ; == Pattern of int3 ==
 
@@ -419,5 +410,5 @@ __ehe:
 
     ; =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-    mov rax, r13
+    mov rax, 0x1010101010101010
     jmp rax

@@ -5,7 +5,7 @@ section .text
 
 _start:
 
-    lea r13, [rel $]
+    lea r13, [rel $] ; rip
 
     mov rdi, [rsp+0x8]
     push r8
@@ -32,7 +32,7 @@ _start:
 
     sub rsp, 144 ; stat_file 
 
-    lea rsi, [rsp]
+    lea rsi, [rsp] ; stat_file
     
     mov r15, rsi ; &stat_file
     mov r12, rdi ; *pathname
@@ -50,16 +50,16 @@ _start:
     syscall
 
     xor rdi, rdi
-    mov rsi, qword [r15+48]
+    mov rsi, qword [r15+48] ; stat_file.st_size
     mov rdx, 0x3
     mov r10, 0x2
     pop r8
     push r8
     mov r9, 0x0
     mov rax, 9
-    syscall ; mmap
+    syscall ; mmap(0x0, stat_file.st_size, 0x3, r10=0x2, r9=0x0, r8=fd);
 
-; =================================
+    ; -----------
 
     push rdi
     push rsi
@@ -70,45 +70,44 @@ _start:
 
     push rax
 
+    ; -----------
+
     mov rdi, 0x6666666666666666 ; offset of the stub
     add rax, rdi ; addr du stub mapped
 
     mov rsi, rax
 
     mov rcx, 0x5555555555555555 ; len_stub => rcx
-    
-    ;push r9
 
+    xor r9, r9
     mov r9, 0xcccccccccccccc00
     add r9, 0xcc
 
 __search_xor:
     lodsq
-    sub rsi, 0x7
+    sub rsi, 0x7 ; to step forward of only one byte
     xor rax, r9 ; 8 int3
-    cmp rax, 0x0
+    cmp rax, 0x0 ; if we found the pattern
     je __get_key
     loop __search_xor
-    mov rax, 60
-    xor rdi, rdi
-    syscall
+    jmp __fail
 
 __get_key:
     mov r8b, byte [rsi+0x9] ; Ok check
     add rsi, 0x9
-    mov r14, rsi
+    mov r14, rsi ; location of the key / pointer to the key
 
 __decrypt_text_file:
-    mov rax, 0x1111111111111111 ; offset .text
-    pop rsi
-    push rax
-    add rsi, rax ; rsi -> addr .text mapped
-    push rsi
+    mov rax, 0x1111111111111111 ; offset .text file
+    pop rsi ; file mapped
+    push rax ; offt text
+    add rsi, rax ; rsi -> addr .text mapped file
+    push rsi ; rsi -> addr .text mapped file
 
-    mov rcx, 0x8888888888888888 ; len_text
-    push rcx
+    mov rcx, 0x8888888888888888 ; len_text file
+    push rcx ; len_text in file
 
-    mov rdi, rsi
+    mov rdi, rsi ; addr text mapped
 
 __loop_decrypt:
     lodsb
@@ -116,17 +115,18 @@ __loop_decrypt:
     stosb
     loop __loop_decrypt
 
-    pop rcx ; len_text
+    pop rcx ; len_text in file
     pop rdi ; addr .text mapped
     pop r10 ; offset .text
-    mov rsi, rdi ; addr .text mappedsss
+    mov rsi, rdi ; addr .text mapped
 
-    ; =-=-=-=-=-=-=-=-=- /dev/urandom =-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+    ; =-=-=- /dev/urandom =-=-=-=
 
-    push rax
-    push rdi
-    push rsi
-    push rcx
+    xor rax, rax
+    push rax ; ?
+    push rdi ; addr .text mapped
+    push rsi ; addr .text mapped
+    push rcx ; len_text in file
 
     sub rsp, 0x10
     mov dword [rsp], '/dev'
@@ -138,36 +138,37 @@ __loop_decrypt:
     mov rax, 0x2
     lea rdi, [rsp] ; pointeur vers /dev/urandom
     mov rsi, 0x0 ; 0_RD
-    mov rdx, 509
+    mov rdx, 509 ; mode ?
     syscall ; open
 
     ; Now we gonna read this random number
 
-    mov rdi, rax
-    xor rax, rax
+    mov rdi, rax ; fd
+    xor rax, rax ; 0
     sub rsp, 0x8
     lea rsi, [rsp]
-    mov rdx, 0x1
+    mov rdx, 0x1 ; we read 1 byte
     syscall ; sys read
 
     mov dl, byte [rsi] ; get random number in dl
 
     ; Now we gonna close the file descriptor
 
-    mov rax, 3
+    mov rax, 3 ; sys_close
     syscall
 
     add rsp, 0x8
     add rsp, 0x10
 
-    pop rcx
-    pop rsi
-    pop rdi
-    pop rax
+    pop rcx ; len text in file
+    pop rsi ; addr .text mapped
+    pop rdi ; addr .text mapped
+    pop rax ; ?
 
-    ; =-=-=-=-=-=-=-=-=- /dev/urandom =-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+    ; =-=-=-=-=-=-=-=-=- /dev/urandom =-=-=-=-=-=-=-=-=-=
 
-    push rcx
+    push rcx ; len text in file
+    xor rax, rax
 
 __loop_encrypt:
     lodsb
@@ -178,24 +179,23 @@ __loop_encrypt:
     pop rcx ; len .text
 
 __edit_key:
-    mov byte [r14], dl
+    mov byte [r14], dl ; set the key
 
-    ; =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+    ; =-=-=-=-=-=-=
 
      ; garbage bytes between the first and the second pt_load
 
      ; =-=-=-=-=-=
 
-    mov rsi, 0x7777777777777777 ; len fst pt load
-    mov rdi, 0x9999999999999999 ; offset 2nd pt_load
+    mov rsi, 0x7777777777777777 ; garbage offt
+    mov rdi, 0x9999999999999999 ; last PT_LOAD offt in file
 
-    push rsi
-    push rdi
-    push rcx
-    push rax
+    push rsi ; end addr .text mapped
+    push rdi ; end addr .text mapped
+    push rcx ; len .text
+    push rax ; shitty value
 
     sub rdi, rsi ; len where we gonna insert our "random" bytes
-
     mov rcx, rdi ; len where we gonna insert our "random" bytes
 
     mov rax, [rbp-184] ; A check (addr where the file is mapped)
@@ -210,50 +210,49 @@ __edit_key:
     mov dword [rsp+12], 0x0000
 
 __loop_random_bytes:
-    push rsi
-    push rdi
-    push rcx
+    push rsi ; addr code cave
+    push rdi ; addr code cave
+    push rcx ; length cave
 
     mov rax, 0x2
     lea rdi, [rsp+24] ; pointeur vers /dev/urandom
     mov rsi, 0x0 ; 0_RD
     mov rdx, 509
-    syscall ; open
+    syscall ; sys_open
 
     ; Now we gonna read this dandom number
 
-    mov rdi, rax
-    xor rax, rax
+    mov rdi, rax ; fd
+    xor rax, rax ; 0x0
     sub rsp, 0x8 ; =-=-=-=-=-=
-    lea rsi, [rsp]
-    mov rdx, 0x1
+    lea rsi, [rsp] ; buf
+    mov rdx, 0x1 ; read
     syscall ; sys read
 
-    mov dl, byte [rsi] ; get random number in dl
+    mov dl, byte [rsi] ; set byte
 
     ; Now we gonna close the file descriptor
 
     mov rax, 3
-    syscall
+    syscall ; sys_close
 
     add rsp, 0x8 ; =-=-=-=-=-=
 
-    pop rcx
-    pop rdi
-    pop rsi
+    pop rcx ; length cave
+    pop rdi ; addr cave
+    pop rsi ; addr cave
 
     lodsb
     xor al, dl
     stosb
-
     loop __loop_random_bytes
 
     add rsp, 0x10
 
-    pop rax
-    pop rcx
-    pop rdi
-    pop rsi
+    pop rax ; shitty value
+    pop rcx ; len .text
+    pop rdi ; end .text
+    pop rsi ; end .text
 
     ; =-=-=-=-=-=
 
@@ -390,12 +389,12 @@ __decrypt_runtime:
     pop rbx
     pop rax
 
-    ; =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+    ; =-=-=-=-=-=-=-=-=-=-=-=
 
     ; Unpacking stub
 
     pop r13 ; base address
-    mov rsi, 0x1111111111111111 ; pattern 0x11111111 for the begin of the .text
+    mov rsi, 0x1010101010101010 ; pattern 0x11111111 for the begin of the .text
     add r13, rsi ; r13 begin of the .text to unpack
 
     ; == Pattern of int3 ==
@@ -432,3 +431,8 @@ __ehe:
 
     mov rax, r13
     jmp rax
+
+__fail:
+    mov rax, 60
+    mov rdi, 0xff
+    syscall

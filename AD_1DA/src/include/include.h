@@ -1,3 +1,6 @@
+#ifndef AD_1DA_INCLUDE_H
+#define AD_1DA_INCLUDE_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,18 +22,22 @@
 #include <keystone/keystone.h>
 #include <capstone/capstone.h>
 
-//  =====================================================================
-//  =======================elf prototypes functions======================
-//  =====================================================================
+#include "misc.h"
+#include "binary.h"
 
+// *=*=*=*=*=*=
 
 int is_elf(unsigned char *eh_ptr);
 
-int add_section_ovrwrte_ep_inject_code(const char *filename, const char *name_sec, unsigned char *stub, ssize_t len_stub, bool pie, bool meta);
+bool is_pie(Elf64_Phdr **buffer_mdata_ph, Elf64_Ehdr *eh_ptr);
+
+int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary, bool meta, void (*u_callback)(unsigned char *, ssize_t, int));
 
 int inject_code_ovrwrt_ep(const char *filename, const char *name_sec, unsigned char *stub, ssize_t len_stub);
 
 int inject_code_ovrwrt_ep_raw_data(const char *filename, const char *name_sec, unsigned char *stub, ssize_t len_stub);
+
+int wrapper_layer(const char *filename, const char *name_sec, unsigned char *stub, ssize_t len_stub, bool meta, ssize_t layer, void (*u_callback)(unsigned char *, ssize_t, int));
 
 unsigned char *init_map_and_get_stub(const char *stub_file, ssize_t *len_stub, bool disass_or_not);
 
@@ -56,17 +63,15 @@ ssize_t len_bytes(unsigned char *bytes);
 
 unsigned char *craft_mprotect_memory(ssize_t *len_crafted_stub);
 
-//int meta_patch();
-
-// ========================== Functions from my packer and my disassembler ============================
-// ==============================https://github.com/n4sm/m0dern_p4cker=================================
-// ====================================================================================================
+// *=*=*=*=*=*=
 
 size_t len_section(Elf64_Ehdr *ptr, Elf64_Shdr *buffer_mdata_sh[], const char *section);
 
-off_t search_section_name(char *sh_name_buffer[], Elf64_Ehdr *ptr, Elf64_Shdr *buffer_mdata_sh[], const char *section, size_t *len_sec);
+off_t search_x_segment(Elf64_Phdr **buffer_mdata_ph, Elf64_Ehdr *eh_ptr, int *len_text);
 
-int patch_target(void *p_entry, long pattern, int size, long patch);
+off_t search_x_segment_ifile(Elf64_Phdr **buffer_mdata_ph, Elf64_Ehdr *eh_ptr, int *len_text);
+
+int patch_target(void *p_entry, unsigned long pattern, int size, unsigned long patch);
 
 int parse_phdr(Elf64_Ehdr *ptr, Elf64_Phdr *buffer_mdata_ph[]);
 
@@ -83,6 +88,8 @@ int r_pack_text(unsigned char *base_addr, size_t len_text, int random_int);
 int c_pack_text(unsigned char *base_addr, size_t len_text, int random_int, int x);
 
 off_t search_section(const char *section, Elf64_Shdr *buffer_mdata_sh[], Elf64_Ehdr *ptr, int *i_sec);
+
+off_t search_section_name(char *sh_name_buffer[], Elf64_Ehdr *ptr, Elf64_Shdr *buffer_mdata_sh[], const char *section, uint64_t *len_sec);
 
 int xor_encrypt(char *target_file);
 
@@ -104,8 +111,8 @@ int complexe_encrypt_pie(char *target_file);
 
 Elf64_Shdr *search_section_from_offt(off_t offset, Elf64_Shdr *buffer_mdata_sh[], Elf64_Ehdr *file_ptr, size_t *_i__);
 
-// ====================================================================================================
-// ====================================================================================================
-// ====================================================================================================
+// *=*=*=*=*=*=
 
 int disass_raw(unsigned char *raw_bytes, ssize_t len_raw_code);
+
+#endif //AD_1DA_MISC_H
