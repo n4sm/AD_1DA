@@ -1,4 +1,4 @@
-all: stub/meta_stub_hook stub/meta_stub_hook_no_pie test_folder/test test_folder/test_c main run clean
+all: stub/meta_stub_hook stub/meta_stub_hook_no_pie test_folder/test test_folder/test_c main run
 
 stub/meta_stub_hook.o: stub/meta_stub_hook.asm
 	nasm -f elf64 stub/meta_stub_hook.asm -o stub/meta_stub_hook.o

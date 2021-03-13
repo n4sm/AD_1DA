@@ -206,11 +206,11 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
         log_ad("The binary PIE based!\n", SUCCESS);
 
         if (patch_target(s_binary->stub,
-                         0x3333333333333333, // vaddr of the beg of the stub in the file
+                         STUB_VADDR, // vaddr of the beg of the stub in the file
                          s_binary->len_stub,
                          (unsigned long)(last_pt_load->p_vaddr + last_pt_load->p_memsz)) ||
             patch_target(s_binary->stub,
-                         0x1010101010101010, // entry point
+                         ENTRY_POINT, // entry point
                          s_binary->len_stub,
                          (unsigned long)(eh_ptr->e_entry))) {
             return -1;
@@ -236,35 +236,35 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
             printf("0x%lx\n", last_pt_load->p_offset - (garbage_pt_load->p_filesz + garbage_pt_load->p_offset));
 
             if (patch_target(s_binary->stub,
-                             (unsigned long)0x4444444444444444, // random key
+                             (unsigned long)RANDOM_KEY, // random key
                              s_binary->len_stub,
                              (unsigned long)random_key) ||
                 patch_target(s_binary->stub,
-                             (unsigned long)0x5555555555555555, // stub length
+                             (unsigned long)LEN_STUB, // stub length
                              s_binary->len_stub,
                              s_binary->len_stub) ||
                 patch_target(s_binary->stub,
-                             (unsigned long)0x6666666666666666, // offset (not at runtime) in the binary
+                             (unsigned long)STUB_FILE_OFFSET, // offset (not at runtime) in the binary
                              s_binary->len_stub,
                              (unsigned long)last_pt_load->p_offset + last_pt_load->p_filesz + gap) ||
                 patch_target(s_binary->stub,
-                             (unsigned long)0x7777777777777777,
+                             (unsigned long)GARBAGE_FILE_OFFSET,
                              s_binary->len_stub,
                              (unsigned long)garbage_pt_load->p_offset + garbage_pt_load->p_filesz) || // beg of the garbage bytes
                 patch_target(s_binary->stub,
-                             (unsigned long)0x1111111111111111, // offset executable area
+                             (unsigned long)TEXT_FILE_OFFSET, // offset executable area
                              s_binary->len_stub,
                              (unsigned long)offt_text_ifile) ||
                 patch_target(s_binary->stub,
-                             (unsigned long)0x8888888888888888,
+                             (unsigned long)LEN_TEXT_ULONG,
                              s_binary->len_stub,
                              (unsigned long)len_text / 8) || // length exec area
                 patch_target(s_binary->stub,
-                             (unsigned long)0x88888888888888cc, // special pattern for text length in bytes
+                             (unsigned long)LEN_TEXT_BYTES, // special pattern for text length in bytes
                              s_binary->len_stub,
                              (unsigned long)len_text) || // NON runtime length
                 patch_target(s_binary->stub,
-                             (unsigned long)0x9999999999999999, // virtual last PT_LOAD offt
+                             (unsigned long)LAST_PT_LOAD_OFFSET, // virtual last PT_LOAD offt
                              s_binary->len_stub,
                              (unsigned long)last_pt_load->p_offset) == -1) {
                 printf("The stub cannot be patched because some pattern cannot be found\n");
@@ -289,7 +289,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
         printf("0x%lx => 0x%lx\n", back_ep, eh_ptr->e_entry);
 
         if (patch_target(s_binary->stub,
-                         (unsigned long )0x3333333333333333,
+                         (unsigned long )BASE_ADDR,
                          s_binary->len_stub,
                          (unsigned long)base_addr)) {
             log_ad("The stub cannot be patched because the pattern 0x3333333333333333 can't be found\n", FAILURE); // 0x3333333333333333
@@ -301,39 +301,39 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
             printf("0x%lx\n", last_pt_load->p_offset - (garbage_pt_load->p_offset + garbage_pt_load->p_filesz));
 
             if (patch_target(s_binary->stub,
-                             (unsigned long)0x4444444444444444,
+                             (unsigned long)RANDOM_KEY,
                              s_binary->len_stub,
                              (unsigned long)random_key) ||
                 patch_target(s_binary->stub,
-                             (unsigned long)0x5555555555555555,
+                             (unsigned long)LEN_STUB,
                              s_binary->len_stub,
                              (unsigned long)s_binary->len_stub) ||
                 patch_target(s_binary->stub,
-                             (unsigned long)0x6666666666666666, // NON virtual offt in the stub
+                             (unsigned long)STUB_FILE_OFFSET, // NON virtual offt in the stub
                              s_binary->len_stub,
                              (unsigned long)last_pt_load->p_offset + last_pt_load->p_memsz) ||
                 patch_target(s_binary->stub,
-                             (unsigned long)0x7777777777777777, // beg garbage bytes
+                             (unsigned long)GARBAGE_FILE_OFFSET, // beg garbage bytes
                              s_binary->len_stub,
                              (unsigned long)garbage_pt_load->p_filesz + garbage_pt_load->p_offset) ||
                 patch_target(s_binary->stub,
-                             (unsigned long)0x1111111111111111,
+                             (unsigned long)TEXT_FILE_OFFSET,
                              s_binary->len_stub,
                              (unsigned long)offt_text_ifile) || // NON virtual offt
                 patch_target(s_binary->stub,
-                             (unsigned long)0x8888888888888888,
+                             (unsigned long)LEN_TEXT_ULONG,
                              s_binary->len_stub,
                              (unsigned long)len_text / 8) || // NON runtime length
                 patch_target(s_binary->stub,
-                             (unsigned long)0x88888888888888cc, // special pattern for text length in bytes
+                             (unsigned long)LEN_TEXT_BYTES, // special pattern for text length in bytes
                              s_binary->len_stub,
                              (unsigned long)len_text) || // NON runtime length
                 patch_target(s_binary->stub,
-                             (unsigned long)0x1010101010101010,
+                             (unsigned long)ENTRY_POINT,
                              s_binary->len_stub,
                              (unsigned long)back_ep) || // virtual offt ep
                 patch_target(s_binary->stub,
-                             (unsigned long)0x9999999999999999, // offset last PT_LOAD
+                             (unsigned long)LAST_PT_LOAD_OFFSET, // offset last PT_LOAD
                              s_binary->len_stub,
                              (unsigned long)last_pt_load->p_offset)) { // offset NOT at runtime
                 return -1;
