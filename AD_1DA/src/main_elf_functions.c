@@ -241,7 +241,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
                              s_binary->len_stub,
                              (unsigned long)last_pt_load->p_offset) == -1) {
                 printf("The stub cannot be patched because some pattern cannot be found\n");
-                exit(-1);
+                return -1;
             }
         }
     } else {
@@ -266,7 +266,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
                          s_binary->len_stub,
                          (unsigned long)base_addr)) {
             log_ad("The stub cannot be patched because the pattern 0x3333333333333333 can't be found\n", FAILURE); // 0x3333333333333333
-            exit(-1);
+            return -1;
         }
 
         if (meta) {
