@@ -26,8 +26,6 @@ layer:
 	Number of layer you want for the final binary (base 16)
 ```
 
-Inject code:
-
 ```bash
 $ ./main test_folder/test_c -m stub/meta_stub_hook 10
 Raw executables bytes in the stub : 
