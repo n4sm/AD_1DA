@@ -93,7 +93,7 @@ __search_xor:
     jmp __fail
 
 __get_key:
-    mov r8b, byte [rsi+0x9] ; Ok check
+    mov r8, [rsi+0x9] ; Ok check
     add rsi, 0x9
     mov r14, rsi ; location of the key / pointer to the key
 
@@ -110,9 +110,9 @@ __decrypt_text_file:
     mov rdi, rsi ; addr text mapped
 
 __loop_decrypt:
-    lodsb
-    xor al, r8b
-    stosb
+    lodsq
+    xor rax, r8
+    stosq
     loop __loop_decrypt
 
     pop rcx ; len_text in file
@@ -147,10 +147,10 @@ __loop_decrypt:
     xor rax, rax ; 0
     sub rsp, 0x8
     lea rsi, [rsp]
-    mov rdx, 0x1 ; we read 1 byte
+    mov rdx, 0x8 ; we read 1 byte
     syscall ; sys read
 
-    mov dl, byte [rsi] ; get random number in dl
+    mov rdx, [rsi] ; get random number in rdx
 
     ; Now we gonna close the file descriptor
 
@@ -171,15 +171,15 @@ __loop_decrypt:
     xor rax, rax
 
 __loop_encrypt:
-    lodsb
-    xor al, dl
-    stosb
+    lodsq
+    xor rax, rdx
+    stosq
     loop __loop_encrypt
 
     pop rcx ; len .text
 
 __edit_key:
-    mov byte [r14], dl ; set the key
+    mov [r14], rdx ; set the key
 
     ; =-=-=-=-=-=-=
 
@@ -257,17 +257,20 @@ __loop_random_bytes:
     ; =-=-=-=-=-=
 
     mov rdi, qword [rbp+88] ; base address (begin pt load)
+    mov r10, 0x1111111111111111 ; offset .text
     add r10, rdi ; addr at runtime of the .text à unpack
 
     ; Don't forget the mprotect
 
+    mov rdi, r10
     push r10 ; addr virtual .text
     push r8 ; key
 
     push rcx
 
     mov rdx, 0x7 ; RWX
-    mov rax, 10 ; mprotect
+    mov rsi, 0x88888888888888cc ; special pattern for text length in bytes
+    mov rax, 0xa; mprotect
     syscall
 
     pop rcx ; len .text
@@ -279,9 +282,9 @@ __loop_random_bytes:
     mov rdi, rax
 
 __decrypt_runtime:
-    lodsb
-    xor al, r8b
-    stosb
+    lodsq
+    xor rax, r8
+    stosq
     loop __decrypt_runtime
 
     pop r9

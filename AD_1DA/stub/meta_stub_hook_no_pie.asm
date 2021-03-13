@@ -56,6 +56,9 @@ _start:
 
 ; =================================
 
+    cmp rax, -1
+    je __fail
+
     push rdi
     push rsi
     push rcx
@@ -63,7 +66,7 @@ _start:
     push r8
     push r9
 
-    push rax
+    push rax ; binary mmaped
 
     mov rdi, 0x6666666666666666 ; offset of the stub
     add rax, rdi ; addr du stub mapped
@@ -85,11 +88,11 @@ __search_xor:
     je __get_key
     loop __search_xor
     mov rax, 60
-    xor rdi, rdi
+    mov rdi, 42
     syscall
 
 __get_key:
-    mov r8b, byte [rsi+0x9] ; Ok check
+    mov r8, [rsi+0x9] ; Ok check
     add rsi, 0x9
     mov r14, rsi
 
@@ -106,9 +109,9 @@ __decrypt_text_file:
     mov rdi, rsi
 
 __loop_decrypt:
-    lodsb
-    xor al, r8b
-    stosb
+    lodsq
+    xor rax, r8
+    stosq
     loop __loop_decrypt
 
     pop rcx ; len_text
@@ -141,10 +144,10 @@ __loop_decrypt:
     xor rax, rax
     sub rsp, 0x8
     lea rsi, [rsp]
-    mov rdx, 0x1
+    mov rdx, 0x8
     syscall ; sys read
 
-    mov dl, byte [rsi] ; get random number in dl
+    mov rdx, [rsi] ; get random number in dl
 
     ; Now we gonna close the file descriptor
 
@@ -165,15 +168,15 @@ __loop_decrypt:
     xor rax, rax
 
 __loop_encrypt:
-    lodsb
-    xor al, dl
-    stosb
+    lodsq
+    xor rax, rdx
+    stosq
     loop __loop_encrypt
 
     pop rcx ; len .text
 
 __edit_key:
-    mov byte [r14], dl
+    mov [r14], rdx
 
     ; =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -240,13 +243,14 @@ __loop_random_bytes:
 
     add rsp, 0x10
 
-    pop rax
-    pop rcx
-    pop rdi
-    pop rsi
+    pop rax ; shitty value
+    pop rcx ; len .text
+    pop rdi ; end .text
+    pop rsi ; end .text
 
     mov rdi, qword [rbp+88] ; base address (begin pt load)
-    add r10, rdi ; addr at runtime of the .text à unpack
+    mov r10, 0x1111111111111111 ; offset .text
+    add r10, rdi; addr at runtime of the .text to unpack
 
     ; Don't forget the mprotect
 
@@ -257,7 +261,8 @@ __loop_random_bytes:
     push rcx
 
     mov rdx, 0x7 ; RWX
-    mov rax, 10 ; mprotect
+    mov rsi, 0x88888888888888cc ; special pattern for text length in bytes
+    mov rax, 0xa ; mprotect
     syscall
 
     pop rcx ; len .text
@@ -269,9 +274,9 @@ __loop_random_bytes:
     mov rdi, rax
 
 __decrypt_runtime:
-    lodsb
-    xor al, r8b
-    stosb
+    lodsq
+    xor rax, r8
+    stosq
     loop __decrypt_runtime
 
     pop r9
@@ -412,3 +417,8 @@ __ehe:
 
     mov rax, 0x1010101010101010
     jmp rax
+
+__fail:
+    mov rax, 60
+    mov rdi, 0xff
+    syscall

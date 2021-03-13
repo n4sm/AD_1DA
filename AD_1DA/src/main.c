@@ -21,8 +21,8 @@
 #include <capstone/capstone.h>
 #include <keystone/keystone.h>
 
-// just an example of basic xor encryption
-int x_pack_text(unsigned char *base_addr, ssize_t len_text, int random_int) {
+// just an example of basic xor encryption, the engine is providing a 8 byte key and the length of the executable area
+int x_pack_text(unsigned long *base_addr, ssize_t len_text, unsigned long random_int) {
     for (size_t i = 0; i < len_text; i++) {
         base_addr[i] ^= random_int;
     }
@@ -69,7 +69,10 @@ int main(int argc, char **argv){
         meta = true;
     }
 
-    unsigned char *stub = init_map_and_get_stub(argv[3], &len_stub, true);
+    unsigned char *stub = NULL;
+    if (!(stub = init_map_and_get_stub(argv[3], &len_stub, true)))
+        return -1;
+
     wrapper_layer(argv[1], ".x", stub, len_stub, meta, layer, x_pack_text);
 
     free(stub);

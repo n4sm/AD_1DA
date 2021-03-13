@@ -45,7 +45,7 @@ int wrapper_layer(const char *filename,
                   ssize_t len_stub,
                   bool meta,
                   ssize_t layer,
-                  int (*u_callback)(unsigned char *, ssize_t, int)) {
+                  int (*u_callback)(unsigned long *, ssize_t, unsigned long)) {
     unsigned char *fresh_stub = malloc(len_stub);
     mdata_binary_t *s_binary = malloc(sizeof(mdata_binary_t));
 
@@ -58,7 +58,7 @@ int wrapper_layer(const char *filename,
     printf("%s\n", filename);
 
     for (int i = 0; i < layer; ++i) {
-       printf("Working on 0x%x mutation => %s\n", i, filename);
+       printf("Working on layer 0x%x => %s\n", i, filename);
        memcpy(fresh_stub, stub, len_stub);
        // Reset fresh stub for each iteration
 
@@ -69,6 +69,8 @@ int wrapper_layer(const char *filename,
            log_ad("Exit\n", FAILURE);
            exit(-1);
        }
+
+       s_binary->current_layer += 1;
 
     }
 
@@ -86,12 +88,13 @@ int wrapper_layer(const char *filename,
 // core
 int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
                                        bool meta,
-                                       int (*u_callback)(unsigned char *, ssize_t, int)) {
+                                       int (*u_callback)(unsigned long *, ssize_t, unsigned long)) {
     unsigned char *file_ptr;
-    int random_key = 0;
+    unsigned long random_key = 0;
     ssize_t len_text_runtime = 0;
     ssize_t len_text = 0;
     unsigned long ep;
+    off_t offt_text_ifile = 0x0;
 
     // Elf structure
 
@@ -165,14 +168,24 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
     printf("0x%lx\n", gap);
 
     // offset of the .text
-    off_t offset_text = search_x_segment(buffer_mdata_ph, eh_ptr, (int *)&len_text_runtime); // offset **AT RUNTIME** of the target main executable memory area
-    off_t offt_text_ifile = search_x_segment_ifile(buffer_mdata_ph, eh_ptr, (int *)&len_text);
+    // If it's the first time we're working on the binary
+    if (!s_binary->current_layer) {
+       offt_text_ifile = search_x_segment_ifile(buffer_mdata_ph, eh_ptr, (int *)&len_text);
+       s_binary->back_target_offt = offt_text_ifile;
+       s_binary->target_len = len_text;
+    } else {
+        len_text = s_binary->target_len;
+        offt_text_ifile = s_binary->back_target_offt;
+    }
 
     log_ad("Target executable memory area offt: ", SUCCESS);
-    printf("0x%lx (memory), 0x%lx (file)\n", offset_text, offt_text_ifile);
+    printf("0x%lx (file)\n", offt_text_ifile);
+
+    log_ad("Length of the target executable area: ", SUCCESS);
+    printf("0x%lx\n", s_binary->target_len);
 
     if (meta) {
-        char tmp[0x100];
+        unsigned long tmp[0x100];
         int fd_rand = open("/dev/urandom", O_RDONLY);
 
         if (fd_rand < 0) {
@@ -180,8 +193,10 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
             return -1;
         }
 
-        read(fd_rand, tmp, 0x100);
-        random_key = tmp[0x50] & 0xff;
+        read(fd_rand, tmp, 0x100*sizeof(unsigned long));
+        random_key = tmp[0x50] & 0xffffffffffffffff;
+
+        close(fd_rand);
     }
 
     // Pie or not
@@ -243,7 +258,11 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
                 patch_target(s_binary->stub,
                              (unsigned long)0x8888888888888888,
                              s_binary->len_stub,
-                             (unsigned long)len_text) || // length exec area
+                             (unsigned long)len_text / 8) || // length exec area
+                patch_target(s_binary->stub,
+                             (unsigned long)0x88888888888888cc, // special pattern for text length in bytes
+                             s_binary->len_stub,
+                             (unsigned long)len_text) || // NON runtime length
                 patch_target(s_binary->stub,
                              (unsigned long)0x9999999999999999, // virtual last PT_LOAD offt
                              s_binary->len_stub,
@@ -304,6 +323,10 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
                 patch_target(s_binary->stub,
                              (unsigned long)0x8888888888888888,
                              s_binary->len_stub,
+                             (unsigned long)len_text / 8) || // NON runtime length
+                patch_target(s_binary->stub,
+                             (unsigned long)0x88888888888888cc, // special pattern for text length in bytes
+                             s_binary->len_stub,
                              (unsigned long)len_text) || // NON runtime length
                 patch_target(s_binary->stub,
                              (unsigned long)0x1010101010101010,
@@ -317,9 +340,6 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
             }
         }
     }
-
-    log_ad("Number of mutations: ", SUCCESS);
-    printf("0x%lx\n", 256 * (last_pt_load->p_offset - (garbage_pt_load->p_filesz + garbage_pt_load->p_offset - 1)));
 
     // edit program header
     for (int i = 0; i < eh_ptr->e_phnum; ++i) {
@@ -374,7 +394,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
     memcpy(s_binary->fbinary, local_fbinary, s_binary->len_file);
 
     if (meta) {
-        u_callback((unsigned char *)(s_binary->fbinary + offt_text_ifile), len_text, random_key);
+        u_callback((unsigned long *)(s_binary->fbinary + offt_text_ifile), len_text / 8, random_key);
     }
 
     log_ad("Bytes injected at ", SUCCESS);
@@ -404,6 +424,11 @@ unsigned char *init_map_and_get_stub(const char *stub_filename, ssize_t *len_stu
     struct stat stat_file = {0};
 
     int fd = open(stub_filename, O_RDWR);
+
+    if (fd < 0) {
+        log_ad("Error open: ", FAILURE);
+        printf("%s\n", stub_filename);
+    }
 
     if (fstat(fd, &stat_file)) {
         printf("[ERROR] fstat has failed\n");
@@ -515,6 +540,9 @@ int init_binary(const char *filename, mdata_binary_t *s_binary, unsigned char *s
     s_binary->stub = stub;
     s_binary->len_stub = len_stub;
     s_binary->filename = filename;
+    s_binary->current_layer = 0x0;
+    s_binary->back_target_offt = 0x0;
+    s_binary->target_len = 0x0;
 
     return 0;
 }

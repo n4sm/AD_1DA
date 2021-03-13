@@ -21,6 +21,7 @@
 int patch_target(void *p_entry, unsigned long pattern, int size, unsigned long patch) {
 	p_entry = (unsigned char *)p_entry;
 	unsigned long result;
+	bool s = false;
 
 	for(int i = 0 ; i < size; i++) {
 		result = *((unsigned long *)(p_entry+i)) ^ pattern;
@@ -29,13 +30,17 @@ int patch_target(void *p_entry, unsigned long pattern, int size, unsigned long p
             log_ad("patch_target: ", SUCCESS);
             printf("0x%lx => 0x%lx\n",  *((unsigned long *)(p_entry+i)), patch);
 			*((unsigned long *)(p_entry+i)) = patch;
-			return 0;
+			s = true;
 		}
 	}
 
-	log_ad("Pattern ", FAILURE);
-	printf("0x%lx not found\n", pattern);
-	return -1;
+	if (!s) {
+        log_ad("Pattern ", FAILURE);
+        printf("0x%lx not found\n", pattern);
+        return -1;
+	}
+
+    return 0;
 }
 
 // *=*=*=*=*=*=
@@ -85,14 +90,10 @@ off_t search_x_segment_ifile(Elf64_Phdr **buffer_mdata_ph, Elf64_Ehdr *eh_ptr, i
     Elf64_Phdr *pt_dyn = search_pt_dyn(buffer_mdata_ph, eh_ptr);
 
     for (size_t i = 0; i < eh_ptr->e_phnum; i++) {
-        if (buffer_mdata_ph[i]->p_flags & PF_W) {
-            continue;
-        }
-
         if (buffer_mdata_ph[i]->p_type == PT_LOAD
             && buffer_mdata_ph[i]->p_filesz > max
-            && buffer_mdata_ph[i]->p_flags & PF_X) {
-
+            && buffer_mdata_ph[i]->p_flags & PF_X
+            && !(buffer_mdata_ph[i]->p_flags & PF_W)) {
             if (pt_dyn && buffer_mdata_ph[i]->p_vaddr
                     + buffer_mdata_ph[i]->p_filesz > pt_dyn->p_vaddr) {
                 continue;
