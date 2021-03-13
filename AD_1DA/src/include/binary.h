@@ -39,4 +39,12 @@ int init_binary(const char *filename, mdata_binary_t *s_binary, unsigned char *s
 
 int free_binary(mdata_binary_t *s_binary);
 
+int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary, bool meta, int (*u_callback)(unsigned char *, ssize_t, int));
+
+int wrapper_layer(const char *filename, const char *name_sec, unsigned char *stub, ssize_t len_stub, bool meta, ssize_t layer, int (*u_callback)(unsigned char *, ssize_t, int));
+
+int inject_section(unsigned char *buffer_bytes, ssize_t buffer_len, unsigned char *address_to_inject, off_t from_to_inject);
+
+unsigned char *init_map_and_get_stub(const char *stub_file, ssize_t *len_stub, bool disass_or_not);
+
 #endif //AD_1DA_BINARY_H

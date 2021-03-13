@@ -20,4 +20,6 @@ int dump_struct(void *s, short type);
 
 int dump_file(const char *name, unsigned char *to_dump, ssize_t len_dump);
 
+int disass_raw(unsigned char *raw_bytes, ssize_t len_raw_code);
+
 #endif //AD_1DA_MISC_H

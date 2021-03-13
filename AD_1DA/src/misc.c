@@ -14,7 +14,7 @@
 #include <getopt.h>
 #include <ctype.h>
 
-#include "include/include.h"
+#include "include/parsing_utils.h"
 #include "include/misc.h"
 
 #include <capstone/capstone.h>

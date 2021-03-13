@@ -15,7 +15,7 @@
 #include <capstone/capstone.h>
 #include <time.h> 
 
-#include "include/include.h"
+#include "include/parsing_utils.h"
 #include "include/misc.h"
 
 int patch_target(void *p_entry, unsigned long pattern, int size, unsigned long patch) {
@@ -50,6 +50,8 @@ Elf64_Phdr *search_pt_dyn(Elf64_Phdr **buffer_mdata_ph, Elf64_Ehdr *eh_ptr) {
     return 0;
 }
 
+// *=*=*=*=*=*=
+
 // If we have a PT_NOTE or a PT_DYNAMIC we're good else
 off_t search_x_segment(Elf64_Phdr **buffer_mdata_ph, Elf64_Ehdr *eh_ptr, int *len_text) {
     ssize_t max = 0;
@@ -74,6 +76,8 @@ off_t search_x_segment(Elf64_Phdr **buffer_mdata_ph, Elf64_Ehdr *eh_ptr, int *le
 	
 	return offset - base_addr;
 }
+
+// *=*=*=*=*=*=
 
 off_t search_x_segment_ifile(Elf64_Phdr **buffer_mdata_ph, Elf64_Ehdr *eh_ptr, int *len_text) {
     ssize_t max = 0;
@@ -119,6 +123,8 @@ bool is_pie(Elf64_Phdr **buffer_mdata_ph, Elf64_Ehdr *eh_ptr) {
     return min == 0;
 }
 
+// *=*=*=*=*=*=
+
 off_t search_section_name(char *sh_name_buffer[], Elf64_Ehdr *ptr, Elf64_Shdr *buffer_mdata_sh[], const char *section, uint64_t *len_sec) {
 
     for (size_t i = 0; i < ptr->e_shnum; i++) {
@@ -127,24 +133,6 @@ off_t search_section_name(char *sh_name_buffer[], Elf64_Ehdr *ptr, Elf64_Shdr *b
             return buffer_mdata_sh[i]->sh_offset;
         }
     }
-}
-
-// *=*=*=*=*=*=
-
-size_t len_section(Elf64_Ehdr *ptr, Elf64_Shdr *buffer_mdata_sh[], const char *section) {
-
-	size_t len=0;
-	char *sh_name_buffer[ptr->e_shnum];
-
-	parse_sh_name(ptr, buffer_mdata_sh, sh_name_buffer);
-
-	for (size_t i = 0; i < ptr->e_shnum; i++) {
-		if (!strcmp(sh_name_buffer[i], section)) {
-			len = buffer_mdata_sh[i]->sh_size;
-		}
-	}
-
-	return len;
 }
 
 // *=*=*=*=*=*=
@@ -164,7 +152,7 @@ uint64_t search_base_addr(Elf64_Phdr *buffer_mdata_phdr[], Elf64_Ehdr *eh_ptr) {
 
 // *=*=*=*=*=*=
 
-char  *parse_sh_name(Elf64_Ehdr *ptr, Elf64_Shdr *buffer_mdata_sh[], char *sh_name_buffer[ptr->e_shnum]) {
+char **parse_sh_name(Elf64_Ehdr *ptr, Elf64_Shdr *buffer_mdata_sh[], char *sh_name_buffer[ptr->e_shnum]) {
 	Elf64_Shdr *shstrtab_header = (Elf64_Shdr *) ((char *)ptr + (ptr->e_shoff + ptr->e_shentsize * ptr->e_shstrndx));
 	const char *shstrndx = (const char *)ptr + shstrtab_header->sh_offset;
 
@@ -172,7 +160,7 @@ char  *parse_sh_name(Elf64_Ehdr *ptr, Elf64_Shdr *buffer_mdata_sh[], char *sh_na
 		sh_name_buffer[i] = (char *)shstrndx + buffer_mdata_sh[i]->sh_name;
 	}
 
-	return 0;
+	return sh_name_buffer;
 }
 
 // *=*=*=*=*=*=
@@ -239,42 +227,3 @@ Elf64_Phdr *search_fst_pt_load(Elf64_Ehdr *eh_ptr, Elf64_Phdr *ph_ptr[]) {
     return (Elf64_Phdr *)1;
 }
 
-// *=*=*=*=*=*=
-
-Elf64_Shdr *search_section_from_offt(off_t offset, Elf64_Shdr *buffer_mdata_sh[], Elf64_Ehdr *file_ptr, size_t *_i__) {
-    off_t back_index = buffer_mdata_sh[0]->sh_offset;
-
-    for (size_t i = 1; i < file_ptr->e_shnum; i++) {
-        if ((buffer_mdata_sh[i]->sh_offset - back_index) > (buffer_mdata_sh[i]->sh_offset - offset)){
-            *_i__ = i;
-            return buffer_mdata_sh[i];
-        }
-    }
-
-    return 0;
-}
-
-// *=*=*=*=*=*=
-
-int has_pie_or_not(Elf64_Phdr *buffer_mdata_ph[], Elf64_Ehdr *ptr){
-    for (size_t i = 0; i < ptr->e_phnum; i++) {
-
-        if (buffer_mdata_ph[i]->p_type == PT_LOAD && buffer_mdata_ph[i]->p_flags == 0x5) {
-            if (!buffer_mdata_ph[i]->p_vaddr) {
-                return 0;
-            } else {
-                return 1;
-            }
-        }
-    }
-}
-
-// *=*=*=*=*=*=
-
-int x_pack_text(unsigned char *base_addr, size_t len_text, int random_int) {
-    for (size_t i = 0; i < len_text; i++) {
-        base_addr[i] ^= random_int;
-    }
-
-    return 0;
-}

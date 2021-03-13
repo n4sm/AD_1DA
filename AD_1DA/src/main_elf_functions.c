@@ -13,10 +13,9 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <elf.h>
-#include <bfd.h>
-#include <pthread.h> 
+#include <pthread.h>
 
-#include "include/include.h"
+#include "include/parsing_utils.h"
 #include "include/misc.h"
 #include "include/binary.h"
 
@@ -46,7 +45,7 @@ int wrapper_layer(const char *filename,
                   ssize_t len_stub,
                   bool meta,
                   ssize_t layer,
-                  void (*u_callback)(unsigned char *, ssize_t, int)) {
+                  int (*u_callback)(unsigned char *, ssize_t, int)) {
     unsigned char *fresh_stub = malloc(len_stub);
     mdata_binary_t *s_binary = malloc(sizeof(mdata_binary_t));
 
@@ -73,7 +72,7 @@ int wrapper_layer(const char *filename,
 
     }
 
-    const char *new_name = (const char *)strcat(filename, name_sec);
+    const char *new_name = (const char *)strcat((char *)filename, name_sec);
     dump_file(new_name, s_binary->fbinary, s_binary->len_file);
 
     free_binary(s_binary);
@@ -87,7 +86,7 @@ int wrapper_layer(const char *filename,
 // core
 int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
                                        bool meta,
-                                       void (*u_callback)(unsigned char *, ssize_t, int)) {
+                                       int (*u_callback)(unsigned char *, ssize_t, int)) {
     unsigned char *file_ptr;
     int random_key = 0;
     ssize_t len_text_runtime = 0;
@@ -136,7 +135,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
     }
 
     if (!garbage_pt_load) {
-        log_ad("AD_1DA does not support binary with only on PT_LOAD for now\n", FAILURE);
+        log_ad("AD_1DA does not support binary with only one PT_LOAD for now\n", FAILURE);
         log_ad("Please do a PR at: https://github.com/n4sm/AD_1DA/pulls if you can change that >.<\n", FAILURE);
         return -1;
     }
@@ -166,8 +165,8 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
     printf("0x%lx\n", gap);
 
     // offset of the .text
-    off_t offset_text = search_x_segment(buffer_mdata_ph, eh_ptr, &len_text_runtime); // offset **AT RUNTIME** of the target main executable memory area
-    off_t offt_text_ifile = search_x_segment_ifile(buffer_mdata_ph, eh_ptr, &len_text);
+    off_t offset_text = search_x_segment(buffer_mdata_ph, eh_ptr, (int *)&len_text_runtime); // offset **AT RUNTIME** of the target main executable memory area
+    off_t offt_text_ifile = search_x_segment_ifile(buffer_mdata_ph, eh_ptr, (int *)&len_text);
 
     log_ad("Target executable memory area offt: ", SUCCESS);
     printf("0x%lx (memory), 0x%lx (file)\n", offset_text, offt_text_ifile);
@@ -260,7 +259,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
 
         if (!base_addr) {
             log_ad("Binary not PIE based\n", FAILURE);
-            exit(-1);
+            return -1;
         }
 
         eh_ptr->e_entry = last_pt_load->p_vaddr + last_pt_load->p_memsz;
@@ -388,7 +387,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
     printf("\n");
 
     log_ad("Stub length: ", SUCCESS);
-    printf("0x%x\n", s_binary->len_stub);
+    printf("0x%lx\n", s_binary->len_stub);
 
     if (munmap(local_fbinary, s_binary->len_file) == -1) {
         log_ad("Error munmap\n", FAILURE);
@@ -400,6 +399,7 @@ int add_section_ovrwrte_ep_inject_code(mdata_binary_t  *s_binary,
 
 // *=*=*=*=*=*=*=*
 
+// return valid pointer to the executable bytes of the stub if success and NULL if error
 unsigned char *init_map_and_get_stub(const char *stub_filename, ssize_t *len_stub, bool disass_or_not) {
     struct stat stat_file = {0};
 
@@ -444,7 +444,7 @@ unsigned char *init_map_and_get_stub(const char *stub_filename, ssize_t *len_stu
 
     off_t offset_entry = 0;
 
-    if (!has_pie_or_not(buffer_mdata_ph, eh_ptr)) {
+    if (!is_pie(buffer_mdata_ph, eh_ptr)) {
         offset_entry = eh_ptr->e_entry; // pie
     } else {
         uint64_t base_address = search_base_addr(buffer_mdata_ph, eh_ptr);
@@ -477,7 +477,7 @@ unsigned char *init_map_and_get_stub(const char *stub_filename, ssize_t *len_stu
     }
 
     if (munmap(stub_ptr, stat_file.st_size)) {
-       return -1;
+       return NULL;
     }
 
     close(fd);
@@ -525,18 +525,6 @@ int free_binary(mdata_binary_t *s_binary) {
     free(s_binary->fbinary);
 
     return 0;
-}
-
-// *=*=*=*=*=*=*=*
-
-Elf64_Shdr *elf_struct_search_section_name(Elf64_Ehdr *eh_ptr, Elf64_Shdr *buffer_mdata_sh[], const char *section, char *sh_name_buffer[]) {
-    for (size_t i = 0; i < eh_ptr->e_shnum; i++) {
-        if (!strcmp(section, sh_name_buffer[i])) {
-            return buffer_mdata_sh[i];
-        }
-    }
-
-    return (Elf64_Shdr *)-1; // sadness
 }
 
 // *=*=*=*=*=*=*=*

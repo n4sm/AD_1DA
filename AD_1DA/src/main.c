@@ -14,11 +14,21 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include "include/include.h"
+#include "include/parsing_utils.h"
 #include "include/misc.h"
+#include "include/binary.h"
 
 #include <capstone/capstone.h>
 #include <keystone/keystone.h>
+
+// just an example of basic xor encryption
+int x_pack_text(unsigned char *base_addr, ssize_t len_text, int random_int) {
+    for (size_t i = 0; i < len_text; i++) {
+        base_addr[i] ^= random_int;
+    }
+
+    return 0;
+}
 
 int main(int argc, char **argv){
     unsigned long layer = 0;
@@ -44,14 +54,12 @@ int main(int argc, char **argv){
         return -1;
     }
 
-    char *end = 0;
+    char **end = 0;
 
     layer = strtol(argv[4], end, 16);
 
     if (errno != 0) {
         printf("Conversion error, %s\n", strerror(errno));
-    } else if (end) {
-        printf("Converted partially: %i, non-convertible part: %s\n", argv[4], end);
     } else if (layer < 0) {
         log_ad("Bad layer\n", FAILURE);
         return -1;
