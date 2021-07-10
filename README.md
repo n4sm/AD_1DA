@@ -2,7 +2,7 @@
 
 # AD_1DA
 
-AD_1DA is a modern tool made in order to obfuscate your elf binaries.
+Another linux obfuscator that creates at each execution a new packed version of itself to avoid code signatures.
 
 ### Installation
 
@@ -479,14 +479,14 @@ $ ./test_folder/demo.sh test_folder/test_c.x                                    
   9 md5 : abe0498cf9a071fb7725ee5a36996678  test_folder/test_c.x
  ```
 
-### Work in progress ..
+## Work in progress ..
 
 Discord -> https://0xthxmxs.github.io/discord 
 
-### Requirements
+## Requirements
 
 [Libcapstone](https://www.capstone-engine.org/)
 
-### License
+## License
 
 [GPL](https://www.gnu.org/licenses/gpl-3.0.fr.html)
