@@ -481,7 +481,7 @@ $ ./test_folder/demo.sh test_folder/test_c.x                                    
 
 ## Work in progress ..
 
-Discord -> https://0xthxmxs.github.io/discord 
+Discord -> https://ret2school.github.io/discord.html 
 
 ## Requirements
 
