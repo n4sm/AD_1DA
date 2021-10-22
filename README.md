@@ -4,14 +4,14 @@
 
 Another linux obfuscator that creates at each execution a new packed version of itself to avoid code signatures.
 
-## Installation
+# Installation
 
 ```bash
 git clone https://github.com/n4sm/AD_1DA
 cd AD_1DA/AD_1DA && make
 ```
 
-## Usage
+# Usage
 
 ```bash
 $ ./main
